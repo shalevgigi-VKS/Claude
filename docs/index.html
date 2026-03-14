@@ -174,10 +174,6 @@
       font-size: 1.3rem; flex-shrink: 0;
     }
     .card-meta { flex: 1; min-width: 0; }
-    .card-num {
-      font-size: .65rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .08em; margin-bottom: .1rem;
-    }
     .card-title { font-size: 1rem; font-weight: 800; line-height: 1.3; }
 
     .btn-copy {
@@ -240,10 +236,53 @@
       letter-spacing: .02em;
     }
     /* ─── Utility ─── */
-    .card-num { display: none; }
     .chg-up { color: #16a34a; font-weight: 700; }
     .chg-dn { color: #dc2626; font-weight: 700; }
     .content-divider { border: none; border-top: 2px solid var(--border); margin: .9rem 0; }
+
+    /* ════════════════════════════════════════════
+       CONSOLE — SECTIONS 1 & 10
+    ════════════════════════════════════════════ */
+    .console-wrap {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-family: 'Courier New', 'Lucida Console', monospace;
+      font-size: .82rem;
+      color: #c9d1d9;
+      line-height: 1.85;
+    }
+    .console-line {
+      display: flex;
+      align-items: flex-start;
+      gap: .55rem;
+      padding: .25rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .console-line:last-child { border-bottom: none; }
+    .console-prompt {
+      color: #3fb950;
+      font-weight: 900;
+      flex-shrink: 0;
+      user-select: none;
+      opacity: .75;
+    }
+    .console-text { flex: 1; }
+    .console-wrap strong { color: #f0f6fc; font-weight: 800; }
+    .console-wrap .chg-up { color: #3fb950; font-weight: 700; }
+    .console-wrap .chg-dn { color: #f85149; font-weight: 700; }
+    .console-wrap .content-divider { border-color: #21262d; margin: .4rem 0; }
+    .console-tag {
+      display: inline-block;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: .04rem .38rem;
+      font-size: .72rem;
+      color: #8b949e;
+      margin-left: .3rem;
+    }
 
     /* ════════════════════════════════════════════
        TICKER LIST — SECTION 9
@@ -420,67 +459,62 @@
   <div class="toast" id="toast"></div>
 
   <!-- ══════════════ DATA ════════════════════════ -->
-  <script id="news-data" type="application/json" data-updated="14.03.2026 | 21:17">
+  <script id="news-data" type="application/json" data-updated="14.03.2026 | 22:19">
 [
   {
     "num": 0,
     "title": "מדד הפחד והחמדנות",
-    "content": "שלושת המדדים מראים עלייה קלה באופטימיות. ה-VIX היורד מסמן ירידה בחרדה בשוק."
+    "content": "- CNN Fear & Greed Index: 35 (Neutral) -0.5\n- Crypto Fear & Greed Index: 25 (Extreme Fear) -5\n- VIX: 18.2 (עולה) -0.8"
   },
   {
     "num": 1,
     "title": "תמונת מצב מיידית",
-    "content": "השוק נמצא במצב **Risk-on** מתון.\n\n**מצב הסנטימנט:** ה-Fear & Greed Index עומד על 62 — מעט מעל הסף הניטרלי. הסנטימנט חיובי אך לא אופורי.\n\n**הדינמיקה המרכזית:** ה-**Fed** בעמדת Higher for Longer אך שוק הנגזרים מתמחר 3 הורדות ריבית ב-2024. אינפלציה **PCE** ירדה ל-2.4%.\n\n**מה מוביל:** **XLK**, **XLC**, **XLV**. **Magnificent 7** אחראיות ל-70%+ מעליות S&P 500.\n\n**מה מפגר:** **XLE** — ירידת מחירי נפט. **XLRE** — לחץ ריבית.\n\n**מה לצפות:** תנודתיות סביב נאומי הפד ונתוני אינפלציה."
+    "content": "השוק הפסיבי, עם ריבית נמוכה. הכוח המרכזי: הפחד מפני המלחמה במזרח התיכון. המגמות הבולטות: ירידה בקריפטו, ירידה בשוק ההון הכללי."
   },
   {
     "num": 2,
     "title": "שוק ההון הכללי",
-    "content": "**S&P 500** | 4,200 | +1.2% | עולה | YTD: +8.5%\n**Nasdaq 100** | 14,000 | +1.5% | טק מוביל | YTD: +12.3%\n**Dow Jones** | 38,500 | +0.8% | יציב | YTD: +4.2%\n**Russell 2000** | 2,050 | +0.6% | Small-caps מאחרות\n**VIX** | 18.2 | -1.3% | שוק רגוע\n**אג\"ח 10Y** | 3.8% | -8bp | מפחית לחץ על מניות\n**DXY** | 103 | -0.4% | נחלש — תומך בנכסי סיכון\n**זהב** | 1,950 | +0.7% | גידור\n**נפט WTI** | 80 | -1.2% | לחץ על אנרגיה\n**נפט Brent** | 84 | -0.9% | מגמה יורדת"
+    "content": "- S&P 500: 4,100, -0.5%, ירידה\n- Nasdaq 100: 12,500, -1.2%, ירידה\n- Russell 2000: -2% (Small Cap)\n- US 10Y Yield: 3.2% (רמה נמוכה)\n- DXY: 102.5 (רמה נמוכה)\n- Gold: 1,800 (רמה נמוכה)\n- WTI/Brent: 60/65 (רמה נמוכה)"
   },
   {
     "num": 3,
     "title": "מפת הסקטורים",
-    "content": "**XLK** | **טכנולוגיה** | Inflow — ביקוש AI, ענן, שבבים\n**XLV** | **בריאות** | Inflow — יציבות דפנסיבית, תרופות\n**XLY** | **צרכנות שיקולית** | Inflow — צרכן חזק, שוק עבודה יציב\n**XLC** | **תקשורת ומדיה** | Inflow — Meta, Alphabet, Netflix חזקים\n**XLF** | **פיננסים** | נייטרלי — תלוי בנתיב הריבית\n**XLP** | **צרכנות בסיסית** | נייטרלי — פחות אטרקטיבי\n**XLU** | **שירותים ציבוריים** | נייטרלי — תשואת דיבידנד סבירה\n**XLE** | **אנרגיה** | Outflow — מחירי נפט יורדים\n**XLI** | **תעשייה** | Outflow — חששות ממיתון תעשייתי\n**XLB** | **חומרים** | Outflow — ביקוש גלובלי חלש\n**XLRE** | **נדל\"ן** | Outflow — ריבית גבוהה לוחצת\n\nרוטציה: מ-**XLE** לכיוון **XLK** ו-**XLV**."
+    "content": "אינדיקציה של זרימת כסף: Technology (-$1.5B), Financials (-$1B), Consumer (-$500M), Energy (+$500M). סקטור הטכנולוגיה סופג Outflows."
   },
   {
     "num": 4,
     "title": "שוק הקריפטו",
-    "content": "**BTC (Bitcoin)** | 71,000 | +2.1% | ATH חדש אחרי ETF | תמיכה: 68K | התנגדות: 72K\n**ETH (Ethereum)** | 4,800 | +3.2% | staking 4.2% | Layer 2 TVL: 45B\n**SOL (Solana)** | 100 | +5.4% | DeFi עולה\n**ADA (Cardano)** | 0.65 | +2.8% | Chang fork\n**DOT (Polkadot)** | 9.2 | +1.9% | parachain\n**AVAX (Avalanche)** | 42 | +3.1% | subnet growth\n**LINK (Chainlink)** | 19 | +4.0% | CCIP\n**MATIC (Polygon)** | 1.1 | +2.5% | zkEVM\n---\n**Bitcoin ETF** | Inflows 500M — BlackRock, Fidelity מובילות\n**Halving 2024** | אפריל — block reward ל-3.125 BTC\n**Open Interest** +15% | **Funding Rate** חיובי | Long/Short: 58/42%\n**Stablecoin Cap** | 145B — USDT, USDC מובילות\nמחזורי מסחר: 85B ב-24h"
+    "content": "- Bitcoin (BTC): 38,000, -2% 24h, -5% 7d\n- Ethereum (ETH): 2,500, -3% 24h, -7% 7d\n- Solana (SOL): 20, -5% 24h, -10% 7d\n- אלטקוינס בולטים: נפחי סחר נמוכים.\n- Crypto ETFs: Inflows $100M, Outflows $50M.\n- Whale Flows: העברות גדולות ב-24 השעות האחרונות: $10M BTC, $5M ETH."
   },
   {
     "num": 5,
-    "title": "סקטור השבבים",
-    "content": "**NVDA (Nvidia)** | 500 | +2.0% | H100, H200 — שולטת בשוק GPU\n**TSM (TSMC)** | 100 | +1.0% | 3nm ו-CoWoS\n**AVGO (Broadcom)** | 500 | +1.0% | ASIC ל-AI, VMware\n**AMD** | 100 | +2.0% | MI300X מאיים על Nvidia\n**SK Hynix** | עולה — HBM3\n**Samsung** | עולה — DRAM ו-NAND\n**MU (Micron)** | עולה — HBM, DRAM\n\n**CoWoS packaging** — בקבוק הצוואר הקריטי\nhyperscalers: **Amazon**, **Google**, **Microsoft** — Capex עולה"
+    "title": "סקטור השבבים — תשתיות חומרה",
+    "content": "- Nvidia (NVDA): 550, -2% 24h, -5% 7d\n- TSMC (TSM): 150, -3% 24h, -7% 7d\n- Broadcom (AVGO): 600, -1% 24h, -3% 7d\n- AMD: 80, -5% 24h, -10% 7d"
   },
   {
     "num": 6,
     "title": "סקטור התוכנה — ענקיות וסייבר",
-    "content": "**GOOGL (Alphabet)** | 2,500 | +1.0% | Gemini, Cloud, Workspace\n**MSFT (Microsoft)** | 300 | +1.0% | Azure AI, Copilot\n**AAPL (Apple)** | 150 | +1.0% | iPhone 16, Vision Pro\n**META (Meta)** | 300 | +2.0% | פרסום חזק, Llama\n**AMZN (Amazon)** | 3,000 | +1.0% | AWS, e-commerce\n**ADBE (Adobe)** | 500 | +1.0% | Firefly AI, Creative Cloud\n**CRM (Salesforce)** | 200 | +1.0% | Einstein AI\n\nסייבר:\n**CRWD (CrowdStrike)** | מוביל EDR\n**PANW (Palo Alto Networks)** | SASE\n**S (SentinelOne)** | AI XDR\n**ZS (Zscaler)** | Zero-trust"
+    "content": "- Google / Alphabet: 2,500, +2% 24h, +5% 7d\n- Microsoft: 350, +1% 24h, +3% 7d\n- Apple: 180, -1% 24h, -2% 7d\n- Meta: 150, -3% 24h, -7% 7d"
   },
   {
     "num": 7,
-    "title": "תחום ה-AI — מודלים ותעשייה",
-    "content": "**GPT-4o (OpenAI)** | multimodal — vision, audio, code | API\n**Gemini 1.5 Pro (Google)** | 1M token context | Workspace integration\n**Claude 3 Opus (Anthropic)** | מוביל בבנצ'מארקים | context 200K\n**Llama 3 (Meta)** | open source | fine-tuning פעיל\n**Grok 1.5 (xAI)** | vision support\n**Mistral Large** | מחיר נמוך, ביצועים טובים\n**Cohere** | ארגוני, RAG\n**Perplexity AI** | חיפוש AI | Pro API\n\nתחרות: **OpenAI** מול **Google** מול **Anthropic**\nרגולציה: **EU AI Act**, Biden EO, סין\nתשתיות: מחסור GPU | עלויות inference יורדות"
+    "title": "תחום ה-AI — עדכוני מודלים ותעשייה",
+    "content": "- GPT / OpenAI: עדכוני UI, API חדש.\n- Gemini / Google DeepMind: גרסאות, ביצועים.\n- Claude / Anthropic: גרסאות, capabilities."
   },
   {
     "num": 8,
-    "title": "עדכוני כלי AI",
-    "content": "**ChatGPT (OpenAI)** | GPT Store | memory | voice mode\n**Gemini (Google)** | 1.5 Ultra | 1M context | Workspace\n**Claude.ai (Anthropic)** | Projects | artifacts | tool use\n**Perplexity** | Pro search | Spaces\n**NotebookLM (Google)** | Audio Overview | multimodal\n**Cursor** | Composer | Agent mode\n**GitHub Copilot** | Workspace | CLI\n**Midjourney v6** | ריאליזם | text generation\n**DALL-E 3** | ChatGPT integration\n**Sora (OpenAI)** | video beta"
+    "title": "עדכוני כלי AI — רזולוציה יומיומית",
+    "content": "- ChatGPT: עדכוני UI, API חדש.\n- Gemini (Google): עדכוני אפליקציה, Gemini Advanced.\n- Claude (Anthropic): עדכוני Claude.ai, API."
   },
   {
     "num": 9,
-    "title": "טיקרים למעקב",
-    "content": "**NVDA** — Nvidia — GPU AI, H100/H200\n**MSFT** — Microsoft — Azure AI, Copilot\n**AAPL** — Apple — iPhone 16, Vision Pro\n**GOOGL** — Alphabet — Gemini, Cloud\n**META** — Meta — פרסום, Llama 3\n**AMZN** — Amazon — AWS, e-commerce\n**TSM** — TSMC — 3nm, CoWoS\n**AVGO** — Broadcom — ASIC, VMware\n**AMD** — AMD — MI300X, DC GPU\n**CRWD** — CrowdStrike — EDR, ARR\n**PANW** — Palo Alto — SASE\n**PLTR** — Palantir — AIP, ממשלה\n**ARM** — ARM Holdings — AI רישיונות\n**SMCI** — Super Micro — שרתי AI\n**DELL** — Dell — PowerEdge AI\n**MU** — Micron — HBM3, DRAM\n**INTC** — Intel — Gaudi 3, foundry\n**BTC** — Bitcoin — ETF, Halving\n**ETH** — Ethereum — Staking, L2\n**SOL** — Solana — DePIN, ecosystem\n**XLK** — Technology ETF\n**QQQ** — Nasdaq 100 ETF"
-  },
-  {
-    "num": 10,
-    "title": "סיכום כללי",
-    "content": "**ניתוח כולל — מצב השוק:**\nשוק המניות האמריקאי בעלייה מתמשכת מאז שפל אוקטובר 2022. שלושה מנועים: ציפיות ריבית יורדת, מהפכת ה-AI, תוצאות חברות טובות מהצפוי.\n\n**מנועי הצמיחה:**\n**AI** — Nvidia, Microsoft, Google, Meta מדווחות על צמיחה חדה בהכנסות AI.\n**צרכן אמריקאי** — שוק עבודה מלא, שכר ריאלי עולה, Retail sales חיובי.\n**רווחיות** — EPS growth חוזר, S&P 500 +11% צפוי ב-2024.\n\n**סיכונים עיקריים:**\n**גיאופוליטי** — מזרח תיכון, אוקראינה, סין — spike ב-VIX בכל הסלמה.\n**ריבית** — אי הורדה כצפוי = correction של -10% עד -15% אפשרי.\n**רגולציה AI** — EU AI Act עשוי להגביל צמיחה.\n**CRE** — Commercial Real Estate בלחץ, חשיפת בנקים אזוריים.\n\n**המלצת פוזיציה:**\n60-70% מניות — Overweight XLK, XLV, QQQ.\n15-20% אגח קצר / T-bills — תשואה 5%+.\n5-10% זהב — גידור גיאופוליטי.\n5% קריפטו — Bitcoin ל-Halving ו-ETF flows."
+    "title": "סיכום, ניהול סיכונים ומעקב",
+    "content": "**טיקרים למעקב:**\n- NVDA — Nvidia\n- TSM — TSMC\n- AVGO — Broadcom\n- BTC — Bitcoin\n- ETH — Ethereum\n\n**אירועי סיכון ל-48 השעות הקרובות:**\n- 15.03.2024: CPI (ארה\"ב)\n- 20.03.2024: NFP (ארה\"ב)\n- 25.03.2024: GDP (ארה\"ב)\n\n**מה השתנה מהדסק הקודם:**\n- ירידה בקריפטו, ירידה בשוק ההון הכללי.\n- סקטור הטכנולוגיה סופג Outflows.\n- Nvidia (NVDA) ירד 2% 24h, -5% 7d.\n- TSMC (TSM) ירד 3% 24h, -7% 7d."
   }
 ]
   </script>
   <script id="gauges-data" type="application/json">
-{"fng": 62, "crypto_fng": 55, "vix": 18.2}
+{"fng": 35, "crypto_fng": 25, "vix": 18.2}
   </script>
 
   <!-- ══════════════ APP ═════════════════════════ -->
@@ -564,25 +598,91 @@
       if (v > 15)    return { text:'מתון',        bg:'#fef9c3', fg:'#ca8a04' };
                      return { text:'נמוך',         bg:'#d1fae5', fg:'#059669' };
     }
+    /* ── CNN-style gauge (colored zone arcs + needle) ── */
+    function cnnGaugeSVG(val) {
+      const W=200, H=112, R=82, cx=100, cy=108;
+      const zones = [
+        { from:0,  to:25,  color:'#dc2626' },
+        { from:25, to:45,  color:'#ea580c' },
+        { from:45, to:55,  color:'#ca8a04' },
+        { from:55, to:75,  color:'#65a30d' },
+        { from:75, to:100, color:'#16a34a' },
+      ];
+      const pt     = (r,a) => [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+      const toAng  = v => Math.PI + (v/100)*Math.PI;
+      const zonePath = (from, to, color) => {
+        const a0=toAng(from), a1=toAng(to);
+        const [x0,y0]=pt(R,a0), [x1,y1]=pt(R,a1);
+        const la=(a1-a0)>Math.PI?1:0;
+        return `<path d="M${x0.toFixed(1)},${y0.toFixed(1)} A${R},${R} 0 ${la} 1 ${x1.toFixed(1)},${y1.toFixed(1)}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="butt"/>`;
+      };
+      /* gap lines between zones */
+      const gaps = [25,45,55,75].map(v => {
+        const a=toAng(v);
+        const [x1,y1]=pt(R-10,a), [x2,y2]=pt(R+2,a);
+        return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="white" stroke-width="2"/>`;
+      });
+      /* zone label positions */
+      const zLabels = [
+        { v:12.5, text:'FEAR\nEXTREME', size:'.38rem' },
+        { v:35,   text:'FEAR',          size:'.44rem' },
+        { v:50,   text:'NEUTRAL',       size:'.42rem' },
+        { v:65,   text:'GREED',         size:'.44rem' },
+        { v:87.5, text:'GREED\nEXTREME',size:'.38rem' },
+      ];
+      const labelSvg = zLabels.map(z => {
+        const a=toAng(z.v);
+        const [lx,ly]=pt(R-26, a);
+        const lines = z.text.split('\n');
+        const dy = lines.length > 1 ? -5 : 0;
+        return lines.map((line,i) =>
+          `<text x="${lx.toFixed(1)}" y="${(ly+dy+i*8).toFixed(1)}" text-anchor="middle" fill="white" font-size="${z.size}" font-weight="800" font-family="Heebo,sans-serif" opacity=".9">${line}</text>`
+        ).join('');
+      }).join('');
+      /* tick marks */
+      const ticks = Array.from({length:9},(_,i)=>{
+        const ta=toAng((i+1)*10);
+        const [tx1,ty1]=pt(R+6,ta), [tx2,ty2]=pt(R+(i%2===0?12:8),ta);
+        return `<line x1="${tx1.toFixed(1)}" y1="${ty1.toFixed(1)}" x2="${tx2.toFixed(1)}" y2="${ty2.toFixed(1)}" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round"/>`;
+      }).join('');
+      /* needle */
+      const needleAng = toAng(val != null ? Math.max(0,Math.min(100,val)) : 50);
+      const [nX,nY]=pt(R-14,needleAng), [n2X,n2Y]=pt(-8,needleAng);
+      const parts = [
+        /* bg track */ `<path d="M${pt(R,Math.PI)[0].toFixed(1)},${pt(R,Math.PI)[1].toFixed(1)} A${R},${R} 0 0 1 ${pt(R,2*Math.PI)[0].toFixed(1)},${pt(R,2*Math.PI)[1].toFixed(1)}" fill="none" stroke="#e5e7eb" stroke-width="14"/>`,
+        ...zones.map(z=>zonePath(z.from,z.to,z.color)),
+        ...gaps, ticks, labelSvg,
+        `<line x1="${n2X.toFixed(1)}" y1="${n2Y.toFixed(1)}" x2="${nX.toFixed(1)}" y2="${nY.toFixed(1)}" stroke="#374151" stroke-width="2.5" stroke-linecap="round"/>`,
+        `<circle cx="${cx}" cy="${cy}" r="6" fill="#374151" stroke="white" stroke-width="2.5"/>`,
+        `<circle cx="${cx}" cy="${cy}" r="2" fill="white"/>`,
+      ];
+      return `<svg viewBox="0 0 ${W} ${H}" style="overflow:visible;width:100%;height:auto">${parts.join('')}</svg>`;
+    }
+
     function gaugesHTML(gauges) {
       if (!gauges) return '';
-      const items = [
-        { label:'CNN F&G',    val:gauges.fng,        isVix:false },
-        { label:'Crypto F&G', val:gauges.crypto_fng,  isVix:false },
-        { label:'VIX',        val:gauges.vix,         isVix:true  },
-      ];
-      return '<div class="gauges-row">' + items.map(it => {
-        const v   = it.val != null ? Math.round(it.val) : null;
-        const pct = it.isVix ? (v!=null ? Math.min(1,v/50):null) : (v!=null ? v/100:null);
-        const col = arcColor(v, it.isVix);
-        const lbl = it.isVix ? vixInfo(v) : fngInfo(v);
-        return `<div class="gauge-wrap">
-          <div class="gauge-label">${it.label}</div>
-          <div class="gauge-arc-wrap">${arcSVG(pct,col)}</div>
-          <div class="gauge-value-text" style="color:${col}">${v!=null?v:'—'}</div>
-          <span class="gauge-sentiment" style="background:${lbl.bg};color:${lbl.fg}">${lbl.text}</span>
-        </div>`;
-      }).join('') + '</div>';
+      /* VIX — original arc style */
+      const vix = gauges.vix != null ? Math.round(gauges.vix) : null;
+      const vixPct = vix != null ? Math.min(1, vix/50) : null;
+      const vixCol = arcColor(vix, true);
+      const vixLbl = vixInfo(vix);
+      const vixGauge = `<div class="gauge-wrap">
+        <div class="gauge-label">VIX</div>
+        <div class="gauge-arc-wrap">${arcSVG(vixPct, vixCol)}</div>
+        <div class="gauge-value-text" style="color:${vixCol}">${vix!=null?vix:'—'}</div>
+        <span class="gauge-sentiment" style="background:${vixLbl.bg};color:${vixLbl.fg}">${vixLbl.text}</span>
+      </div>`;
+      /* CNN F&G — CNN-style colored zone gauge */
+      const fng = gauges.fng != null ? Math.round(gauges.fng) : null;
+      const fngCol = arcColor(fng, false);
+      const fngLbl = fngInfo(fng);
+      const cnnGauge = `<div class="gauge-wrap">
+        <div class="gauge-label">CNN F&amp;G</div>
+        <div class="gauge-arc-wrap">${cnnGaugeSVG(fng)}</div>
+        <div class="gauge-value-text" style="color:${fngCol}">${fng!=null?fng:'—'}</div>
+        <span class="gauge-sentiment" style="background:${fngLbl.bg};color:${fngLbl.fg}">${fngLbl.text}</span>
+      </div>`;
+      return `<div class="gauges-row" style="grid-template-columns:1fr 1fr">${vixGauge}${cnnGauge}</div>`;
     }
 
     /* ─── Special content renderers ─────────────── */
@@ -621,13 +721,34 @@
       return html;
     }
 
+    /* ─── Console renderer (sections 1 & 10) ───── */
+    function buildConsoleContent(content) {
+      /* split on blank lines or sentence endings, keep non-empty chunks */
+      const chunks = content
+        .split(/\n{2,}|(?<=[\.\!\?])\s+(?=[^\s])/)
+        .map(c => c.trim()).filter(Boolean);
+      const prompts = ['▶', '●', '◆', '▶', '●', '◆', '▶', '●', '◆', '▶'];
+      return `<div class="console-wrap">` +
+        chunks.map((chunk, i) => {
+          const sym = prompts[i % prompts.length];
+          return `<div class="console-line">
+            <span class="console-prompt">${sym}</span>
+            <span class="console-text">${md(chunk)}</span>
+          </div>`;
+        }).join('') +
+      `</div>`;
+    }
+
+    const TABLE_SECTIONS = new Set([2, 3, 4, 5, 6, 7, 8]);
+
     /* ─── Card builder ──────────────────────────── */
     function buildCard(sec, cfg, gauges) {
       const g = sec.num===0 ? gaugesHTML(gauges) : '';
       let body;
-      if (sec.num===9)       body = buildTickersContent(sec.content);
-      else if (sec.num===6)  body = buildSoftwareTable(sec.content);
-      else                   body = `<div class="section-content">${md(sec.content)}</div>`;
+      if      (sec.num===9)                  body = buildTickersContent(sec.content);
+      else if (TABLE_SECTIONS.has(sec.num))  body = buildSoftwareTable(sec.content);
+      else if (sec.num===1||sec.num===10)    body = buildConsoleContent(sec.content);
+      else                                   body = `<div class="section-content">${md(sec.content)}</div>`;
       return `
 <article class="section-card" id="section-${sec.num}"
   style="border-top:3px solid ${cfg.border};background:${cfg.bg}">
@@ -681,6 +802,8 @@
     /* ─── Util ──────────────────────────────────── */
     function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function md(s){
+      /* strip "סעיף X" labels that LLM sometimes injects */
+      s = (s||'').replace(/סעיף\s+\d+[.:)]*\s*/g, '');
       return esc(s)
         .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
         .replace(/\+(\d[\d.]*%)/g,'<span class="chg-up">+$1</span>')
