@@ -42,7 +42,7 @@ GITHUB_REPO        = os.environ.get("GITHUB_REPO", "chadshani")
 
 TEMP_NEWS   = ROOT / "temp_news.txt"
 OUTPUT_HTML = ROOT / "website" / "index.html"
-PAGES_URL   = f"https://{GITHUB_USER}.github.io/{GITHUB_REPO}/"
+PAGES_URL   = f"https://{GITHUB_USER}.github.io/{GITHUB_REPO}"
 
 SECTION_PATTERN = re.compile(r"^##\s+(\d+)\.\s+(.+)$", re.MULTILINE)
 TS_PATTERN      = re.compile(r"(\d{2}\.\d{2}\.\d{4}\s*\|\s*\d{2}:\d{2})")
