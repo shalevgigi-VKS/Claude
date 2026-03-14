@@ -24,3 +24,4 @@
 | 2026-03-14 22:31 | `54357ba` | fix: enforce exact format for sector map and tickers in prompt | chadshani/chadshani_prompt.txt |
 | 2026-03-14 22:43 | `e50f90f` | feat: real-time F&G + VIX data, enforce screenshot-matching formats | chadshani/chadshani_prompt.txt,chadshani/generate_news.py |
 | 2026-03-14 23:02 | `072de66` | feat: remove F&G/VIX/section0, fix section1 bg, bold names, 8 tickers, expand risk events | chadshani/chadshani_prompt.txt,chadshani/generate_website.py,chadshani/website/index.html |
+| 2026-03-14 23:19 | `e982b60` | fix: sector map 11 exact rows, filter --- separators in JS, crypto fixed coins, remove tickers section | chadshani/chadshani_prompt.txt,chadshani/website/index.html |
