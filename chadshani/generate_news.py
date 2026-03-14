@@ -24,7 +24,7 @@ TEMP_NEWS   = ROOT / "temp_news.txt"
 TZ_IL       = ZoneInfo("Asia/Jerusalem")
 MIN_LENGTH  = 500
 MAX_ARTICLES     = 6
-MAX_CONTENT_CHARS = 40000
+MAX_CONTENT_CHARS = 30000
 
 RSS_SOURCES = [
     ("Reuters Business",  "https://feeds.reuters.com/reuters/businessNews"),
@@ -83,82 +83,92 @@ def fetch_rss() -> list[str]:
 
 # ── LLM API call (Gemini primary, Groq fallback) ───────────────────────────
 
-PROVIDERS = [
-    {
-        "name":    "Gemini",
-        "env":     "GEMINI_API_KEY",
-        "url":     "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-        "models":  ["gemini-2.0-flash"],
-    },
-    {
-        "name":    "Groq",
-        "env":     "GROQ_API_KEY",
-        "url":     "https://api.groq.com/openai/v1/chat/completions",
-        "models":  ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"],
-    },
-]
 MAX_RETRIES = 3
 
 
-def _post_llm(url: str, api_key: str, model: str,
-              system_prompt: str, user_content: str) -> requests.Response:
-    return requests.post(
+def _call_gemini(api_key: str, system_prompt: str, user_content: str) -> tuple[bool, str]:
+    """Native Gemini API — more reliable than OpenAI-compat wrapper."""
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    resp = requests.post(
         url,
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        params={"key": api_key},
+        headers={"Content-Type": "application/json"},
         json={
-            "model":       model,
-            "messages":    [
-                {"role": "system", "content": system_prompt},
-                {"role": "user",   "content": user_content},
-            ],
-            "temperature": 0.3,
-            "max_tokens":  4000,
+            "systemInstruction": {"parts": [{"text": system_prompt}]},
+            "contents": [{"role": "user", "parts": [{"text": user_content}]}],
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 6000},
         },
         timeout=120,
     )
+    if resp.status_code == 429:
+        wait = int(resp.headers.get("retry-after", 60))
+        print(f"[WARN] Gemini 429, waiting {wait}s")
+        time.sleep(wait)
+        return False, "429"
+    resp.raise_for_status()
+    text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+    return True, text
+
+
+def _call_groq(api_key: str, system_prompt: str, user_content: str) -> tuple[bool, str]:
+    for model in ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]:
+        for attempt in range(MAX_RETRIES):
+            resp = requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user",   "content": user_content},
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 4000,
+                },
+                timeout=120,
+            )
+            if resp.status_code == 429:
+                wait = int(resp.headers.get("retry-after", 60))
+                print(f"[WARN] Groq 429 on {model}, waiting {wait}s ({attempt+1}/{MAX_RETRIES})")
+                time.sleep(wait)
+                continue
+            resp.raise_for_status()
+            return True, resp.json()["choices"][0]["message"]["content"]
+    return False, "[ERROR] Groq retries exhausted"
 
 
 def call_groq(system_prompt: str, user_content: str) -> tuple[bool, str]:
-    for provider in PROVIDERS:
-        api_key = os.environ.get(provider["env"], "")
-        if not api_key:
-            print(f"[INFO] {provider['name']} key not set, skipping")
-            continue
+    gemini_key = os.environ.get("GEMINI_API_KEY", "")
+    if gemini_key:
+        try:
+            ok, text = _call_gemini(gemini_key, system_prompt, user_content)
+            if ok and len(text) >= MIN_LENGTH:
+                print("[INFO] Provider: Gemini / gemini-2.0-flash")
+                return True, text
+            if not ok and text != "429":
+                print(f"[WARN] Gemini failed, falling back to Groq")
+        except Exception as e:
+            print(f"[WARN] Gemini error: {e}, falling back to Groq")
+    else:
+        print("[INFO] GEMINI_API_KEY not set, using Groq")
 
-        for model in provider["models"]:
-            for attempt in range(MAX_RETRIES):
-                try:
-                    resp = _post_llm(provider["url"], api_key, model, system_prompt, user_content)
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    if not groq_key:
+        msg = "[ERROR] No API keys available (GEMINI_API_KEY or GROQ_API_KEY required)"
+        print(msg, file=sys.stderr)
+        return False, msg
 
-                    if resp.status_code == 429:
-                        wait = int(resp.headers.get("retry-after", 60))
-                        print(f"[WARN] 429 on {provider['name']}/{model}, waiting {wait}s ({attempt+1}/{MAX_RETRIES})")
-                        time.sleep(wait)
-                        continue
-
-                    resp.raise_for_status()
-                    text = resp.json()["choices"][0]["message"]["content"]
-
-                    if len(text) < MIN_LENGTH:
-                        print(f"[WARN] {provider['name']}/{model} output too short ({len(text)} chars), trying next")
-                        break
-
-                    print(f"[INFO] Provider: {provider['name']} / {model}")
-                    return True, text
-
-                except Exception as e:
-                    if "429" in str(e):
-                        wait = 60
-                        print(f"[WARN] 429 on {provider['name']}/{model}, waiting {wait}s ({attempt+1}/{MAX_RETRIES})")
-                        time.sleep(wait)
-                        continue
-                    msg = f"[ERROR] {provider['name']} API error: {e}"
-                    print(msg, file=sys.stderr)
-                    break  # try next model
-
-    msg = "[ERROR] All providers/models exhausted"
-    print(msg, file=sys.stderr)
-    return False, msg
+    try:
+        ok, text = _call_groq(groq_key, system_prompt, user_content)
+        if ok and len(text) >= MIN_LENGTH:
+            print("[INFO] Provider: Groq / llama")
+            return True, text
+        print(text, file=sys.stderr)
+        return False, text
+    except Exception as e:
+        msg = f"[ERROR] Groq API error: {e}"
+        print(msg, file=sys.stderr)
+        return False, msg
 
 
 # ── Main ───────────────────────────────────────────────────────────────────
