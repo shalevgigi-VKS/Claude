@@ -1,11 +1,11 @@
 name: חדשני — עדכון חדשות
 
 on:
-  schedule:
-    - cron: '0 5 * * *'
-    - cron: '30 12 * * *'
-    - cron: '0 19 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'הקלד RESUME כדי להפעיל'
+        required: true
 
 jobs:
   update-news:
