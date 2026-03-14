@@ -45,7 +45,7 @@ TEMPLATE_HTML = ROOT / "website" / "index.html"   # read-only template (always h
 OUTPUT_HTML   = ROOT.parent / "docs" / "index.html"  # generated output → GitHub Pages
 PAGES_URL     = f"https://{GITHUB_USER}.github.io/{GITHUB_REPO}"
 
-SECTION_PATTERN = re.compile(r"^##\s+(\d+)\.\s+(.+)$", re.MULTILINE)
+SECTION_PATTERN = re.compile(r"^#{1,3}\s+(\d+)\.\s+(.+)$", re.MULTILINE)
 TS_PATTERN      = re.compile(r"(\d{2}\.\d{2}\.\d{4}\s*\|\s*\d{2}:\d{2})")
 
 # Fear & Greed extraction (looks for "CNN: 42" or "42/100" or standalone number near keyword)
