@@ -23,8 +23,8 @@ PROMPT_FILE = ROOT / "chadshani_prompt.txt"
 TEMP_NEWS   = ROOT / "temp_news.txt"
 TZ_IL       = ZoneInfo("Asia/Jerusalem")
 MIN_LENGTH  = 500
-MAX_ARTICLES     = 6
-MAX_CONTENT_CHARS = 6000
+MAX_ARTICLES      = 6
+MAX_CONTENT_CHARS = 40000   # Gemini handles large context; Groq fallback truncates internally
 
 RSS_SOURCES = [
     ("Reuters Business",  "https://feeds.reuters.com/reuters/businessNews"),
@@ -96,7 +96,7 @@ def _call_gemini(api_key: str, system_prompt: str, user_content: str) -> tuple[b
         json={
             "systemInstruction": {"parts": [{"text": system_prompt}]},
             "contents": [{"role": "user", "parts": [{"text": user_content}]}],
-            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 6000},
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 8192},
         },
         timeout=120,
     )
@@ -111,6 +111,7 @@ def _call_gemini(api_key: str, system_prompt: str, user_content: str) -> tuple[b
 
 
 def _call_groq(api_key: str, system_prompt: str, user_content: str) -> tuple[bool, str]:
+    user_content = user_content[:6000]  # Groq free tier payload limit
     for model in ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]:
         for attempt in range(MAX_RETRIES):
             resp = requests.post(
