@@ -13,3 +13,4 @@
 | 2026-03-14 20:14 | `bbd679c` | fix: pull --rebase before commit to prevent push rejection | .github/workflows/chadshani.yml |
 | 2026-03-14 20:15 | `a45d131` | update docs: gauges redesign, bold content, live clock, mobile ordering | docs/index.html |
 | 2026-03-14 21:19 | `22fc64f` | redesign: single column, light gauges, 3D cards, ticker template, section 10, fix template pipeline | .github/workflows/chadshani.yml,chadshani/generate_website.py,chadshani/website/index.html,docs/index.html |
+| 2026-03-14 21:50 | `11bac5f` | security: add .gitignore to prevent leaking .env and secrets | .gitignore |
