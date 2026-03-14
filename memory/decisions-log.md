@@ -14,3 +14,7 @@
 | 2026-03-14 20:15 | `a45d131` | update docs: gauges redesign, bold content, live clock, mobile ordering | docs/index.html |
 | 2026-03-14 21:19 | `22fc64f` | redesign: single column, light gauges, 3D cards, ticker template, section 10, fix template pipeline | .github/workflows/chadshani.yml,chadshani/generate_website.py,chadshani/website/index.html,docs/index.html |
 | 2026-03-14 21:50 | `11bac5f` | security: add .gitignore to prevent leaking .env and secrets | .gitignore |
+| 2026-03-14 21:54 | `2bd3317` | fix: reduce Groq token usage and add 429 retry with backoff | chadshani/generate_news.py |
+| 2026-03-14 21:55 | `eb70ed6` | fix: switch to llama-3.1-8b-instant primary to avoid 6k TPM limit | chadshani/generate_news.py |
+| 2026-03-14 21:59 | `af5d2e5` | feat: switch to Gemini Flash primary (1M TPM free), Groq fallback | .github/workflows/chadshani.yml,chadshani/generate_news.py |
+| 2026-03-14 22:06 | `a9c01c8` | fix: use native Gemini API instead of broken OpenAI-compat endpoint | chadshani/generate_news.py |
