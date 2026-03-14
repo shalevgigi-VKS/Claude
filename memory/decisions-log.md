@@ -20,3 +20,4 @@
 | 2026-03-14 22:06 | `a9c01c8` | fix: use native Gemini API instead of broken OpenAI-compat endpoint | chadshani/generate_news.py |
 | 2026-03-14 22:09 | `72a6fb3` | ci: force checkout master ref and add version verification step | .github/workflows/chadshani.yml |
 | 2026-03-14 22:15 | `8235fdd` | fix: use gemini-1.5-flash (stable) and reduce Groq payload to 6k chars | chadshani/generate_news.py |
+| 2026-03-14 22:19 | `e39a276` | fix: commit before pull --rebase to avoid unstaged changes error | .github/workflows/chadshani.yml |
