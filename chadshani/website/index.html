@@ -696,7 +696,7 @@ PLACEHOLDER_GAUGES_JSON
       let body;
       if      (sec.num===9)                  body = buildTickersContent(sec.content);
       else if (TABLE_SECTIONS.has(sec.num))  body = buildSoftwareTable(sec.content);
-      else if (sec.num===1||sec.num===10)    body = buildConsoleContent(sec.content);
+      else if (sec.num===10)                 body = buildConsoleContent(sec.content);
       else                                   body = `<div class="section-content">${md(sec.content)}</div>`;
       return `
 <article class="section-card" id="section-${sec.num}"

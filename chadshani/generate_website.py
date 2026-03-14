@@ -168,12 +168,7 @@ def main() -> None:
     sections = parse_sections(text)
     print(f"[STEP_1_COMPLETE] {len(sections)} sections parsed")
 
-    # Extract gauge values from section 0 (if present)
     gauges = {}
-    sec0 = next((s for s in sections if s["num"] == 0), None)
-    if sec0:
-        gauges = extract_gauge_values(sec0["content"])
-        print(f"[GAUGES] {gauges}")
 
     print("[STEP_2] Building HTML...")
     build_html(sections, timestamp, gauges)   # writes directly to docs/index.html
