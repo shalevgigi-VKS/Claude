@@ -23,8 +23,8 @@ PROMPT_FILE = ROOT / "chadshani_prompt.txt"
 TEMP_NEWS   = ROOT / "temp_news.txt"
 TZ_IL       = ZoneInfo("Asia/Jerusalem")
 MIN_LENGTH  = 500
-MAX_ARTICLES     = 4
-MAX_CONTENT_CHARS = 18000
+MAX_ARTICLES     = 3
+MAX_CONTENT_CHARS = 8000
 
 RSS_SOURCES = [
     ("Reuters Business",  "https://feeds.reuters.com/reuters/businessNews"),
@@ -90,7 +90,7 @@ def call_groq(system_prompt: str, user_content: str) -> tuple[bool, str]:
         print(msg, file=sys.stderr)
         return False, msg
 
-    MODELS = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    MODELS = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
     MAX_RETRIES = 4
 
     for model in MODELS:
@@ -109,7 +109,7 @@ def call_groq(system_prompt: str, user_content: str) -> tuple[bool, str]:
                             {"role": "user",   "content": user_content},
                         ],
                         "temperature": 0.3,
-                        "max_tokens":  8000,
+                        "max_tokens":  4000,
                     },
                     timeout=120,
                 )
@@ -128,7 +128,7 @@ def call_groq(system_prompt: str, user_content: str) -> tuple[bool, str]:
                     print(msg, file=sys.stderr)
                     return False, msg
 
-                if model != "llama-3.3-70b-versatile":
+                if model != "llama-3.1-8b-instant":
                     print(f"[INFO] Used fallback model: {model}")
                 return True, text
 
@@ -171,7 +171,7 @@ def main() -> int:
 
     user_content = f"חדשות עדכניות שנאספו עכשיו:\n\n{news_context}"
 
-    print("[STEP_2] Calling Groq API (llama-3.3-70b)...")
+    print("[STEP_2] Calling Groq API (llama-3.1-8b-instant)...")
     ok, output = call_groq(base_prompt, user_content)
 
     if not ok:
