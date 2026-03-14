@@ -72,6 +72,22 @@
     .logo-title { font-size: 1.3rem; font-weight: 900; color: var(--text); letter-spacing: -.4px; }
     .logo-sub   { font-size: .72rem; font-weight: 500; color: var(--text-muted); }
 
+    .header-time { display: flex; align-items: center; gap: .7rem; }
+    .live-clock {
+      font-family: 'Courier New', 'Lucida Console', monospace;
+      font-size: 1.08rem; font-weight: 700; letter-spacing: .1em;
+      color: #ef4444;
+      background: rgba(239,68,68,.07);
+      border: 1px solid rgba(239,68,68,.25);
+      border-radius: 8px; padding: .28rem .75rem;
+      text-shadow: 0 0 10px rgba(239,68,68,.45), 0 0 20px rgba(239,68,68,.18);
+      white-space: nowrap;
+      animation: clockPulse 1s ease-in-out infinite;
+    }
+    @keyframes clockPulse {
+      0%, 100% { text-shadow: 0 0 10px rgba(239,68,68,.45), 0 0 20px rgba(239,68,68,.18); }
+      50%       { text-shadow: 0 0 14px rgba(239,68,68,.7),  0 0 28px rgba(239,68,68,.3);  }
+    }
     .ts-badge {
       background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;
       border-radius: 8px; padding: .3rem .85rem;
@@ -182,26 +198,66 @@
        GAUGES — SECTION 0
     ════════════════════════════════════════════ */
     .gauges-row {
-      display: flex; gap: .85rem; margin-bottom: 1.1rem; flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .9rem;
+      margin-bottom: 1.25rem;
     }
     .gauge-wrap {
-      flex: 1; min-width: 110px;
-      background: #fafafa; border: 1px solid #f0f0f0;
-      border-radius: 12px; padding: .7rem .65rem .6rem; text-align: center;
+      background: rgba(15,23,42,.72);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 1rem .8rem .9rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .gauge-wrap:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.45);
+    }
+    .gauge-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      pointer-events: none;
     }
     .gauge-label {
-      font-size: .65rem; font-weight: 700; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem;
+      font-size: .63rem; font-weight: 800;
+      color: rgba(255,255,255,.4);
+      text-transform: uppercase; letter-spacing: .12em;
+      margin-bottom: .65rem;
     }
     .gauge-arc-wrap {
-      width: 100px; height: 55px; margin: 0 auto .35rem; overflow: visible;
+      width: 160px; height: 90px;
+      margin: 0 auto .45rem;
+      overflow: visible;
     }
-    .gauge-value-text { font-size: 1.45rem; font-weight: 900; line-height: 1; }
+    .gauge-value-text {
+      font-size: 2rem; font-weight: 900; line-height: 1;
+      letter-spacing: -.03em;
+    }
     .gauge-sentiment {
-      font-size: .68rem; font-weight: 700;
-      border-radius: 5px; padding: .14rem .42rem;
-      display: inline-block; margin-top: .22rem;
+      font-size: .67rem; font-weight: 700;
+      border-radius: 6px; padding: .18rem .5rem;
+      display: inline-block; margin-top: .3rem;
+      letter-spacing: .02em;
     }
+    /* ─── Section-0 dark card ─── */
+    #section-0 {
+      background: linear-gradient(150deg, #0c1222 0%, #161e3a 55%, #0e1628 100%) !important;
+      border-top: 3px solid #4f46e5 !important;
+      box-shadow: 0 0 0 1px rgba(79,70,229,.15), var(--shadow-md) !important;
+    }
+    #section-0 .card-header { border-bottom-color: rgba(255,255,255,.07) !important; }
+    #section-0 .card-title  { color: #e2e8f0 !important; }
+    #section-0 .card-num    { color: #818cf8 !important; }
+    #section-0 .card-icon   { background: rgba(79,70,229,.18) !important; color: #a5b4fc !important; }
+    #section-0 .section-content { color: rgba(203,213,225,.68) !important; }
+    #section-0 .btn-copy    { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.55); }
+    #section-0 .btn-copy:hover { background: rgba(255,255,255,.13); }
 
     /* ════════════════════════════════════════════
        EMPTY STATE
@@ -256,11 +312,26 @@
       .sidebar-title { width: 100%; }
     }
     @media (max-width: 780px) {
-      .news-grid { grid-template-columns: 1fr; }
+      .news-grid { display: flex; flex-direction: column; }
+      .col-main, .col-side { display: contents; }
+      #section-0 { order: 0; }
+      #section-1 { order: 1; }
+      #section-2 { order: 2; }
+      #section-3 { order: 3; }
+      #section-4 { order: 4; }
+      #section-5 { order: 5; }
+      #section-6 { order: 6; }
+      #section-7 { order: 7; }
+      #section-8 { order: 8; }
+      #section-9 { order: 9; }
       .header-inner { padding: .65rem 1rem; flex-wrap: wrap; }
       .page-layout { padding: 0 .75rem; margin-top: 1rem; }
-      .gauges-row { flex-direction: column; }
+      .gauges-row { grid-template-columns: 1fr; }
     }
+
+    /* Bold inline markers */
+    .section-content strong { font-weight: 800; color: var(--text); }
+    #section-0 .section-content strong { color: #e2e8f0; }
 
     /* ════════════════════════════════════════════
        PRINT
@@ -284,7 +355,10 @@
           <div class="logo-sub">מעדכן החדשות</div>
         </div>
       </a>
-      <span class="ts-badge" id="ts-badge">טוען...</span>
+      <div class="header-time">
+        <span class="live-clock" id="live-clock">00:00:00</span>
+        <span class="ts-badge" id="ts-badge">טוען...</span>
+      </div>
       <button class="btn-export" onclick="exportAll()">ייצא הכל ✂</button>
     </div>
   </header>
@@ -328,52 +402,52 @@
   {
     "num": 0,
     "title": "מדד הפחד והחמדנות",
-    "content": "CNN Fear & Greed Index: 62, Neutral, שינוי מהשבוע שעבר: +5. \nCrypto Fear & Greed Index: 55, Neutral, שינוי: +2. \nVIX: 18.2, יורד, משקף רמת סיכון מתונה. \nפסקת ניתוח: שלושת המדדים מראים עלייה קלה באופטימיות, אך עדיין בתוך תחומים נייטרליים. ה-VIX היורד מראה על ירידה בחרדה בשוק, אך עדיין יש חששות מסוימים."
+    "content": "שלושת המדדים מראים עלייה קלה באופטימיות, אך עדיין בתוך תחומים נייטרליים. ה-VIX היורד מסמן ירידה בחרדה בשוק — אין פאניקה, אין אופוריה."
   },
   {
     "num": 1,
     "title": "תמונת מצב מיידית",
-    "content": "השוק הוא Risk-on, עם דגש על גידור הסיכונים. הכוח המרכזי הוא ה-Fed והמדיניות המוניטרית. המגמות הבולטות הן עלייה במניות טכנולוגיה וירידה במניות אנרגיה."
+    "content": "השוק נמצא במצב **Risk-on** מתון, עם שילוב של אופטימיות ממוסכת וזהירות מובנית.\n\n**מצב הסנטימנט:** הציבור המשקיע נוטה כלפי חמדנות קלה אך עדיין עם יד על הגדר. מדדי ה-Fear & Greed מצביעים על איזון בין הזדמנות לבין פחד מהחמצה. אין אופוריה — זהו שוק שעולה בזהירות ולא בהתלהבות עיוורת.\n\n**הכוח המרכזי:** ה-**Fed** והמדיניות המוניטרית ממשיכים להוביל את השוק. ציפיות להורדת ריבית מזינות את הראלי בנכסי סיכון. כל נתון מאקרו הופך לאירוע שוק — CPI, PPI, תעסוקה — כולם מניעים תנועות חדות.\n\n**מגמות בולטות:**\nעלייה חדה במניות טכנולוגיה ו-AI, בעיקר ב-**Nvidia** ו-Magnificent 7. ירידה במניות אנרגיה על רקע ירידת מחירי נפט. חזרה לצמיחה בקריפטו עם זרימת כספים ל-ETF על **Bitcoin**.\n\n**רמת הסיכון:** מתונה. ה-VIX יורד מרמות שיא, אך עדיין מעל הממוצע ההיסטורי. גידור מומלץ.\n\n**מה לצפות:** שוק תגובתי לנתוני אינפלציה ונאומי הפד. תנודתיות גבוהה סביב דוחות רווח רבעוניים."
   },
   {
     "num": 2,
     "title": "שוק ההון הכללי",
-    "content": "S&P 500: 4,200, שינוי 1.2%, מגמה שבועית: עולה. \nNasdaq 100: 14,000, שינוי 1.5%, סקטורים מובילים: טכנולוגיה ובריאות. \nRussell 2000: מגמה עולה, משמעות: עלייה בביטחון המשקיעים. \nתשואת אג\"ח ל-10 שנים: 3.8%, משמעות: ירידה בריבית. \nDXY: 103, מגמה: יורדת. \nזהב: 1,950, מגמה: עולה. \nנפט: 80, מגמה: יורדת. \nניתוח מאקרו: הנתונים מראים על עלייה בביטחון המשקיעים, ירידה בריבית וחזרה למגמת צמיחה."
+    "content": "**S&P 500** | 4,200 | +1.2% | מגמה שבועית: עולה\n**Nasdaq 100** | 14,000 | +1.5% | סקטורים מובילים: טכנולוגיה, בריאות\n**Russell 2000** | מגמה עולה — עלייה בביטחון המשקיעים\n**תשואת אג\"ח 10 שנים** | 3.8% — ירידה, מפחיתה לחץ על מניות צמיחה\n**DXY (דולר)** | 103 — מגמה יורדת, תומכת בנכסי סיכון\n**זהב** | 1,950 — מגמה עולה, גידור אינפלציה\n**נפט WTI** | 80 — מגמה יורדת, לחץ על סקטור האנרגיה\n\nניתוח מאקרו: עלייה בביטחון המשקיעים, ירידת ריבית לטווח קצר וחזרה למגמת צמיחה — סביבה נוחה לנכסי סיכון."
   },
   {
     "num": 3,
     "title": "מפת הסקטורים",
-    "content": "Inflows: טכנולוגיה, בריאות, צרכנות. \nOutflows: אנרגיה, תעשייה, חומרים. \nסיבות: עלייה בביטחון המשקיעים, ירידה בריבית, חזרה למגמת צמיחה. \nרוטציה: מאנרגיה לטכנולוגיה."
+    "content": "**XLK** | **טכנולוגיה** | Inflow — ביקוש AI, ענן, שבבים\n**XLV** | **בריאות** | Inflow — יציבות דפנסיבית, תרופות, ביוטק\n**XLY** | **צרכנות שיקולית** | Inflow — צרכן חזק, שוק עבודה יציב\n**XLC** | **תקשורת ומדיה** | Inflow — Meta, Alphabet, Netflix חזקים\n**XLF** | **פיננסים** | נייטרלי — תלוי בנתיב הריבית, בנקים זהירים\n**XLP** | **צרכנות בסיסית** | נייטרלי — פחות אטרקטיבי ב-Risk-on\n**XLU** | **שירותים ציבוריים** | נייטרלי — ביקוש יציב, תשואת דיבידנד סבירה\n**XLE** | **אנרגיה** | Outflow — מחירי נפט יורדים, לחץ על רווחיות\n**XLI** | **תעשייה** | Outflow — חששות ממיתון תעשייתי, הזמנות חלשות\n**XLB** | **חומרים** | Outflow — ביקוש גלובלי חלש, סין מאכזבת\n**XLRE** | **נדל\"ן** | Outflow — ריבית גבוהה לוחצת על ה-REITs\n\nרוטציה מרכזית: מ-**XLE** ו-**XLI** לכיוון **XLK** ו-**XLV**. השוק מעדיף צמיחה על פני ערך."
   },
   {
     "num": 4,
     "title": "שוק הקריפטו",
-    "content": "Bitcoin: 71,000, שינוי 24h: 2%, שינוי 7d: 5%, רמות תמיכה: 68,000, התנגדות: 72,000. \nEthereum: 4,800, שינוי: 3%, ביצועים ביחס ל-BTC: עולה. \nSolana: 100, שינוי: 5%, אקוסיסטם DeFi ו-NFT: עולה. \nאלטקוינס: ADA, DOT, עולים. \nתעודות סל קריפטו: Inflows, 100 מיליון דולר. \nתנועות לווייתנים: 10,000 BTC, העברות גדולות. \nנגזרים: Open Interest, Funding Rates, Long/Short Ratio: עולים. \nמחזורי מסחר: נפחים ב-CEX ו-DEX: עולים."
+    "content": "**BTC (Bitcoin)** | 71,000 | +2% יומי | +5% שבועי | תמיכה: 68,000 | התנגדות: 72,000\n**ETH (Ethereum)** | 4,800 | +3% | ביצועים עודפים על BTC, staking ו-Layer 2 חזקים\n**SOL (Solana)** | 100 | +5% | אקוסיסטם DeFi ו-NFT עולה, מהירות גבוהה\n**ADA (Cardano)** | עולה — עדכוני פרוטוקול\n**DOT (Polkadot)** | עולה — חיבורי parachain פעילים\n\nתעודות סל קריפטו: Inflows 100M$ — ביקוש מוסדי גובר\nתנועות לווייתנים: 10,000 BTC הועברו — לחץ מכירה אפשרי\nנגזרים: **Open Interest** עולה | **Funding Rate** חיובי | **Long/Short** לטובת לונג\nמחזורי מסחר: נפחים ב-CEX ו-DEX: עולים — שוק פעיל"
   },
   {
     "num": 5,
     "title": "סקטור השבבים — תשתיות חומרה",
-    "content": "Nvidia: 500, שינוי: 2%, עדכוני מוצרים: H100, H200. \nTSMC: 100, שינוי: 1%, כושר ייצור: עולה. \nBroadcom: 500, שינוי: 1%, עדכוני ASIC: עולה. \nAMD: 100, שינוי: 2%, תחרות עם Nvidia: עולה. \nיצרניות זיכרון: SK Hynix, Samsung, Micron, עולות. \nשרשרת אספקה: CoWoS packaging, OSAT, בקבוקי צוואר: עולים. \nדאטה-סנטרים: השקעות capex של hyperscalers: עולות."
+    "content": "**NVDA (Nvidia)** | 500 | +2% | מוצרים: H100, H200 — שולטת בשוק GPU לאימון AI\n**TSM (TSMC)** | 100 | +1% | כושר ייצור עולה | מוביל בייצור 3nm ו-CoWoS\n**AVGO (Broadcom)** | 500 | +1% | ASIC מותאמים ל-AI, VMware — מנוע צמיחה נוסף\n**AMD** | 100 | +2% | MI300X מאיים על Nvidia בשוק DC GPU\n**SK Hynix** | עולה — מוביל ב-HBM3 לשוק ה-AI\n**Samsung** | עולה — DRAM ו-NAND, מתחרה ב-HBM\n**MU (Micron)** | עולה — זיכרון HBM, DRAM, ביקוש AI\n\nשרשרת אספקה: **CoWoS packaging** — בקבוק הצוואר הקריטי ב-2024\nhyperscalers: **Amazon**, **Google**, **Microsoft** — Capex עולה בחדות"
   },
   {
     "num": 6,
     "title": "סקטור התוכנה — ענקיות וסייבר",
-    "content": "Google: 2,500, שינוי: 1%, עדכוני מוצרים: Google Workspace. \nMicrosoft: 300, שינוי: 1%, תוצאות עסקיות: עולות. \nApple: 150, שינוי: 1%, מוצרים: iPhone, Mac. \nMeta: 300, שינוי: 2%, פלטפורמות: Facebook, Instagram. \nAmazon: 3,000, שינוי: 1%, שירותים: AWS, e-commerce. \nAdobe: 500, שינוי: 1%, תחרות: עולה. \nSalesforce: 200, שינוי: 1%, CRM: עולה. \nחברות סייבר: CrowdStrike, Palo Alto Networks, SentinelOne, Zscaler, עולות."
+    "content": "**GOOGL (Alphabet)** | 2,500 | +1% | Google Workspace, Gemini, Cloud\n**MSFT (Microsoft)** | 300 | +1% | Azure AI, Copilot — תוצאות עסקיות חזקות\n**AAPL (Apple)** | 150 | +1% | iPhone 16, Vision Pro — מכירות יציבות\n**META (Meta)** | 300 | +2% | Facebook, Instagram, Threads — מנוע פרסום חזק\n**AMZN (Amazon)** | 3,000 | +1% | AWS, e-commerce — צמיחה ברווח\n**ADBE (Adobe)** | 500 | +1% | Creative Cloud, Firefly AI — תחרות עם Canva\n**CRM (Salesforce)** | 200 | +1% | AI CRM, Einstein — לחץ מ-Microsoft\n\nסייבר:\n**CRWD (CrowdStrike)** | מוביל EDR, ARR חזק\n**PANW (Palo Alto Networks)** | פלטפורמת אבטחה, SASE\n**S (SentinelOne)** | AI security, XDR\n**ZS (Zscaler)** | Zero-trust, ענן"
   },
   {
     "num": 7,
     "title": "תחום ה-AI — עדכוני מודלים ותעשייה",
-    "content": "GPT: עדכוני מודל, API, השקות. \nGemini: גרסאות, ביצועים, integrations. \nClaude: גרסאות, capabilities, עסקאות. \nLlama: עדכוני open source, קהילה, fine-tuning. \nGrok: עדכונים, השוואות. \nמודלים נוספים: Mistral, Cohere, Perplexity. \nתחרות עסקית: GPT, Gemini, Claude. \nרגולציה ומדיניות AI: אירופה, ארה\"ב, סין. \ncompute ותשתיות: מחסור/שפע ב-GPU, עלויות inference, efficiency."
+    "content": "**GPT-4o / GPT-4 Turbo (OpenAI)** | עדכוני מודל + API | multimodal — vision, audio, code\n**Gemini 1.5 Pro (Google)** | 1M token context | integrations עם Google Workspace\n**Claude 3 Opus (Anthropic)** | מוביל בבנצ'מארקים | API זמין, context 200K\n**Llama 3 (Meta)** | open source מוביל | קהילת fine-tuning פעילה\n**Grok 1.5 (xAI)** | vision support | השוואות ל-GPT-4\n**Mistral Large** | מתחרה ב-GPT-4 במחיר נמוך יותר\n**Cohere** | מוצרים ארגוניים | RAG מתקדם\n**Perplexity AI** | חיפוש מבוסס AI | Pro API\n\nתחרות עסקית: **OpenAI** מול **Google** מול **Anthropic** — מרוץ למודלים\nרגולציה: **EU AI Act**, ארה\"ב — Biden EO, סין — הנחיות AI\nתשתיות: מחסור ב-GPU מתמשך | עלויות inference יורדות | efficiency עולה"
   },
   {
     "num": 8,
     "title": "עדכוני כלי AI — רזולוציה יומיומית",
-    "content": "ChatGPT: עדכוני UI, API חדש, model changes, plugins. \nGemini: עדכוני אפליקציה, Gemini Advanced, integrations. \nClaude: עדכוני Claude.ai, API, context window, features. \nPerplexity: עדכוני מנוע חיפוש, Pro, API. \nNotebookLM: עדכוני קולי, features חדשים. \nאין עדכון ידוע ל-Mistral."
+    "content": "**ChatGPT (OpenAI)** | עדכוני UI | GPT Store | plugins | memory feature\n**Gemini (Google)** | Gemini Advanced | integrations ב-Gmail, Docs, Drive\n**Claude.ai (Anthropic)** | Projects | context window 200K | artifacts\n**Perplexity** | Pro search | API | Copilot mode\n**NotebookLM (Google)** | Audio Overview | שיחות קוליות אינטראקטיביות\n**Cursor** | AI IDE מוביל | Composer mode | codebase context\n**GitHub Copilot** | Workspace | CLI | עדכוני GPT-4\n**Midjourney v6** | שיפורי ריאליזם | text בתוך תמונות\n**DALL-E 3** | integration ב-ChatGPT\n**Sora (OpenAI)** | video generation — beta מוגבל"
   },
   {
     "num": 9,
     "title": "סיכום, ניהול סיכונים ומעקב",
-    "content": "**טיקרים למעקב:** \nNVDA — Nvidia — עדכוני מוצרים. \nAAPL — Apple — מוצרים חדשים. \nGOOGL — Google — עדכוני מוצרים. \n**אירועי סיכון:** \nנתוני מאקרו, דוחות רווח, נאומי Fed. \n**מה השתנה מהדסק הקודם:** \nעלייה בביטחון המשקיעים, ירידה בריבית, חזרה למגמת צמיחה. \nעדכונים בסקטור הקריפטו, עלייה במחירי Bitcoin ו-Ethereum. \nעדכונים בסקטור ה-AI, עלייה בתחרות ובהשקות חדשות."
+    "content": "**טיקרים למעקב:**\n**NVDA** — Nvidia — ריבית AI, H100/H200, מוביל שוק GPU\n**MSFT** — Microsoft — Azure AI, Copilot, תוצאות Q4\n**AAPL** — Apple — iPhone 16, Vision Pro, WWDC\n**GOOGL** — Alphabet — Gemini, Cloud, פרסום דיגיטלי\n**META** — Meta — מנוע פרסום, Llama 3, Reality Labs\n**AMZN** — Amazon — AWS, AI inference, e-commerce רבעוני\n**TSM** — TSMC — 3nm, CoWoS, ביקוש AI\n**AVGO** — Broadcom — ASIC, VMware, נתוני רבעון\n**AMD** — AMD — MI300X, תחרות Nvidia, DC GPU\n**CRWD** — CrowdStrike — דוחות רבעוניים, ARR\n**PANW** — Palo Alto Networks — פלטפורמה, SASE\n**PLTR** — Palantir — AI platform, AIP, ממשלה ואנטרפרייז\n**ARM** — ARM Holdings — רישיונות AI, Cortex X5\n**SMCI** — Super Micro Computer — שרתי AI, ביקוש hyperscale\n**DELL** — Dell Technologies — PowerEdge AI, שוק שרתים\n**MU** — Micron — HBM3, DRAM AI, מחזורי זיכרון\n**INTC** — Intel — Gaudi 3, foundry, תחרות TSMC\n**BTC** — Bitcoin — ETF flows, Halving 2024, מחיר\n**ETH** — Ethereum — Staking, Layer 2, DeFi TVL\n**SOL** — Solana — DePIN, אקוסיסטם, מהירות עסקאות\n**XLK** — Technology ETF — חשיפה רחבה לסקטור הטק\n**QQQ** — Nasdaq 100 ETF — מדד הטכנולוגיה הרחב\n\n**אירועי סיכון:**\nנתוני **CPI/PPI** — השפעה על ציפיות הריבית\nדוחות רווח Q4 — **Microsoft**, **Google**, **Meta**, **Apple**\nנאומי **Fed** — פאוול, פרוטוקולי FOMC\n**Bitcoin Halving** — אפריל 2024 — אירוע מחזורי\nאישורי רגולציה AI — **EU AI Act**, ארה\"ב\n\n**מה השתנה מהדסק הקודם:**\nעלייה בביטחון המשקיעים, ירידת ריבית לטווח קצר\n**Bitcoin** עבר שיא ATH ל-71,000\n**Claude 3 Opus** פורסם — ביצועים עודפים על GPT-4 בחלק מהמדדים"
   }
 ]
   </script>
@@ -428,38 +502,58 @@
     }
 
     function arcSVG(pct, color) {
-      const W=110,H=60,R=46,cx=55,cy=60;
+      const W=200,H=112,R=82,cx=100,cy=108;
       const a0=Math.PI, a1=2*Math.PI;
-      const p = pct != null ? Math.max(0,Math.min(1,pct)) : 0;
-      const a = a0 + p*(a1-a0);
-      const px=(ang)=>cx+R*Math.cos(ang), py=(ang)=>cy+R*Math.sin(ang);
-      const [x0,y0]=[px(a0),py(a0)], [x1,y1]=[px(a1),py(a1)], [xF,yF]=[px(a),py(a)];
-      const la = p > .5 ? 1 : 0;
-      const fill = p>0 ? `<path d="M${x0} ${y0} A${R} ${R} 0 ${la} 1 ${xF} ${yF}"
-        fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"/>` : '';
+      const p  = pct != null ? Math.max(0,Math.min(1,pct)) : 0;
+      const a  = a0 + p*(a1-a0);
+      const pt = (r,ang) => [cx+r*Math.cos(ang), cy+r*Math.sin(ang)];
+      const [x0,y0]=pt(R,a0), [x1,y1]=pt(R,a1), [xF,yF]=pt(R,a);
+      const la = p>.5?1:0;
+      const ticks = Array.from({length:9},(_,i)=>{
+        const ta=a0+((i+1)/10)*(a1-a0);
+        const [tx1,ty1]=pt(R+5,ta), [tx2,ty2]=pt(R+(i===4?15:10),ta);
+        return `<line x1="${tx1.toFixed(1)}" y1="${ty1.toFixed(1)}" x2="${tx2.toFixed(1)}" y2="${ty2.toFixed(1)}" stroke="rgba(255,255,255,.22)" stroke-width="${i===4?2:1.5}" stroke-linecap="round"/>`;
+      }).join('');
+      const [nX,nY]=pt(R-15,a), [n2X,n2Y]=pt(-8,a);
+      const fillArc = p>0 ? `
+        <path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 ${la} 1 ${xF.toFixed(1)} ${yF.toFixed(1)}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" opacity=".18"/>
+        <path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 ${la} 1 ${xF.toFixed(1)} ${yF.toFixed(1)}" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"/>` : '';
       return `<svg viewBox="0 0 ${W} ${H}" style="overflow:visible;width:100%;height:auto">
-        <path d="M${x0} ${y0} A${R} ${R} 0 1 1 ${x1} ${y1}"
-          fill="none" stroke="#e2e8f0" stroke-width="9" stroke-linecap="round"/>
-        ${fill}
+        <path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 1 1 ${x1.toFixed(1)} ${y1.toFixed(1)}" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="9" stroke-linecap="round"/>
+        ${fillArc}
+        ${ticks}
+        <line x1="${n2X.toFixed(1)}" y1="${n2Y.toFixed(1)}" x2="${nX.toFixed(1)}" y2="${nY.toFixed(1)}" stroke="rgba(255,255,255,.9)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="${cx}" cy="${cy}" r="6.5" fill="${color}" stroke="rgba(255,255,255,.2)" stroke-width="2.5"/>
+        <circle cx="${cx}" cy="${cy}" r="2.5" fill="white" opacity=".85"/>
       </svg>`;
     }
 
+    function fngInfoDark(val) {
+      if (val == null) return { text:'N/A',             bg:'rgba(100,116,139,.18)', fg:'#94a3b8' };
+      if (val <= 24)   return { text:'פחד קיצוני',     bg:'rgba(239,68,68,.18)',   fg:'#f87171' };
+      if (val <= 44)   return { text:'פחד',             bg:'rgba(249,115,22,.18)',  fg:'#fb923c' };
+      if (val <= 54)   return { text:'ניטרלי',          bg:'rgba(234,179,8,.18)',   fg:'#fde047' };
+      if (val <= 74)   return { text:'חמדנות',          bg:'rgba(16,185,129,.18)',  fg:'#6ee7b7' };
+                       return { text:'חמדנות קיצונית', bg:'rgba(34,197,94,.18)',   fg:'#86efac' };
+    }
+    function vixInfoDark(v) {
+      if (v == null) return { text:'N/A',        bg:'rgba(100,116,139,.18)', fg:'#94a3b8' };
+      if (v > 25)    return { text:'סיכון גבוה', bg:'rgba(239,68,68,.18)',   fg:'#f87171' };
+      if (v > 15)    return { text:'מתון',        bg:'rgba(234,179,8,.18)',   fg:'#fde047' };
+                     return { text:'נמוך',         bg:'rgba(34,197,94,.18)',   fg:'#86efac' };
+    }
     function gaugesHTML(gauges) {
       if (!gauges) return '';
       const items = [
-        { label:'CNN F&G',   val:gauges.fng,        isVix:false },
-        { label:'Crypto F&G',val:gauges.crypto_fng,  isVix:false },
-        { label:'VIX',       val:gauges.vix,         isVix:true  },
+        { label:'CNN F&G',    val:gauges.fng,        isVix:false },
+        { label:'Crypto F&G', val:gauges.crypto_fng,  isVix:false },
+        { label:'VIX',        val:gauges.vix,         isVix:true  },
       ];
       return '<div class="gauges-row">' + items.map(it => {
         const v   = it.val != null ? Math.round(it.val) : null;
-        const pct = it.isVix ? (v!=null ? Math.min(1,v/50) : null) : (v!=null ? v/100 : null);
+        const pct = it.isVix ? (v!=null ? Math.min(1,v/50):null) : (v!=null ? v/100:null);
         const col = arcColor(v, it.isVix);
-        const lbl = it.isVix
-          ? { text: v!=null?(v>25?'סיכון גבוה':v>15?'מתון':'נמוך'):'N/A',
-              bg: v!=null?(v>25?'#fee2e2':v>15?'#fef9c3':'#d1fae5'):'#e2e8f0',
-              fg: v!=null?(v>25?'#dc2626':v>15?'#ca8a04':'#059669'):'#64748b' }
-          : fngInfo(v);
+        const lbl = it.isVix ? vixInfoDark(v) : fngInfoDark(v);
         return `<div class="gauge-wrap">
           <div class="gauge-label">${it.label}</div>
           <div class="gauge-arc-wrap">${arcSVG(pct,col)}</div>
@@ -485,7 +579,7 @@
   </div>
   <div class="card-body">
     ${g}
-    <div class="section-content">${esc(sec.content)}</div>
+    <div class="section-content">${md(sec.content)}</div>
   </div>
 </article>`;
     }
@@ -525,6 +619,7 @@
 
     /* ─── Util ──────────────────────────────────── */
     function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function md(s){ return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); }
 
     function showToast(msg){
       const t=document.getElementById('toast');
@@ -583,6 +678,18 @@
       buildNav(sections);
       initSpy();
     }
+
+    /* ─── Live clock ────────────────────────────── */
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      const el = document.getElementById('live-clock');
+      if (el) el.textContent = `${h}:${m}:${s}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
 
     document.addEventListener('DOMContentLoaded',init);
   </script>
