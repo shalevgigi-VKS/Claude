@@ -24,7 +24,7 @@ TEMP_NEWS   = ROOT / "temp_news.txt"
 TZ_IL       = ZoneInfo("Asia/Jerusalem")
 MIN_LENGTH  = 500
 MAX_ARTICLES     = 6
-MAX_CONTENT_CHARS = 30000
+MAX_CONTENT_CHARS = 6000
 
 RSS_SOURCES = [
     ("Reuters Business",  "https://feeds.reuters.com/reuters/businessNews"),
@@ -88,7 +88,7 @@ MAX_RETRIES = 3
 
 def _call_gemini(api_key: str, system_prompt: str, user_content: str) -> tuple[bool, str]:
     """Native Gemini API — more reliable than OpenAI-compat wrapper."""
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
     resp = requests.post(
         url,
         params={"key": api_key},
