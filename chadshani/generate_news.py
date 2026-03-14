@@ -23,8 +23,8 @@ PROMPT_FILE = ROOT / "chadshani_prompt.txt"
 TEMP_NEWS   = ROOT / "temp_news.txt"
 TZ_IL       = ZoneInfo("Asia/Jerusalem")
 MIN_LENGTH  = 500
-MAX_ARTICLES     = 3
-MAX_CONTENT_CHARS = 8000
+MAX_ARTICLES     = 6
+MAX_CONTENT_CHARS = 40000
 
 RSS_SOURCES = [
     ("Reuters Business",  "https://feeds.reuters.com/reuters/businessNews"),
@@ -81,71 +81,82 @@ def fetch_rss() -> list[str]:
     return articles
 
 
-# ── Groq API call ──────────────────────────────────────────────────────────
+# ── LLM API call (Gemini primary, Groq fallback) ───────────────────────────
+
+PROVIDERS = [
+    {
+        "name":    "Gemini",
+        "env":     "GEMINI_API_KEY",
+        "url":     "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "models":  ["gemini-2.0-flash"],
+    },
+    {
+        "name":    "Groq",
+        "env":     "GROQ_API_KEY",
+        "url":     "https://api.groq.com/openai/v1/chat/completions",
+        "models":  ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"],
+    },
+]
+MAX_RETRIES = 3
+
+
+def _post_llm(url: str, api_key: str, model: str,
+              system_prompt: str, user_content: str) -> requests.Response:
+    return requests.post(
+        url,
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        json={
+            "model":       model,
+            "messages":    [
+                {"role": "system", "content": system_prompt},
+                {"role": "user",   "content": user_content},
+            ],
+            "temperature": 0.3,
+            "max_tokens":  4000,
+        },
+        timeout=120,
+    )
+
 
 def call_groq(system_prompt: str, user_content: str) -> tuple[bool, str]:
-    api_key = os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        msg = "[ERROR] GROQ_API_KEY not set — add it to GitHub Secrets or .env"
-        print(msg, file=sys.stderr)
-        return False, msg
+    for provider in PROVIDERS:
+        api_key = os.environ.get(provider["env"], "")
+        if not api_key:
+            print(f"[INFO] {provider['name']} key not set, skipping")
+            continue
 
-    MODELS = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
-    MAX_RETRIES = 4
+        for model in provider["models"]:
+            for attempt in range(MAX_RETRIES):
+                try:
+                    resp = _post_llm(provider["url"], api_key, model, system_prompt, user_content)
 
-    for model in MODELS:
-        for attempt in range(MAX_RETRIES):
-            try:
-                resp = requests.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type":  "application/json",
-                    },
-                    json={
-                        "model":       model,
-                        "messages":    [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user",   "content": user_content},
-                        ],
-                        "temperature": 0.3,
-                        "max_tokens":  4000,
-                    },
-                    timeout=120,
-                )
+                    if resp.status_code == 429:
+                        wait = int(resp.headers.get("retry-after", 60))
+                        print(f"[WARN] 429 on {provider['name']}/{model}, waiting {wait}s ({attempt+1}/{MAX_RETRIES})")
+                        time.sleep(wait)
+                        continue
 
-                if resp.status_code == 429:
-                    retry_after = int(resp.headers.get("retry-after", 60))
-                    print(f"[WARN] 429 rate limit on {model}, waiting {retry_after}s (attempt {attempt+1}/{MAX_RETRIES})")
-                    time.sleep(retry_after)
-                    continue
+                    resp.raise_for_status()
+                    text = resp.json()["choices"][0]["message"]["content"]
 
-                resp.raise_for_status()
-                text = resp.json()["choices"][0]["message"]["content"]
+                    if len(text) < MIN_LENGTH:
+                        print(f"[WARN] {provider['name']}/{model} output too short ({len(text)} chars), trying next")
+                        break
 
-                if len(text) < MIN_LENGTH:
-                    msg = f"[ERROR] Groq output too short ({len(text)} chars)"
+                    print(f"[INFO] Provider: {provider['name']} / {model}")
+                    return True, text
+
+                except Exception as e:
+                    if "429" in str(e):
+                        wait = 60
+                        print(f"[WARN] 429 on {provider['name']}/{model}, waiting {wait}s ({attempt+1}/{MAX_RETRIES})")
+                        time.sleep(wait)
+                        continue
+                    msg = f"[ERROR] {provider['name']} API error: {e}"
                     print(msg, file=sys.stderr)
-                    return False, msg
+                    break  # try next model
 
-                if model != "llama-3.1-8b-instant":
-                    print(f"[INFO] Used fallback model: {model}")
-                return True, text
-
-            except requests.exceptions.HTTPError as e:
-                if resp.status_code == 429:
-                    continue  # already handled above
-                msg = f"[ERROR] Groq API error: {e}"
-                print(msg, file=sys.stderr)
-                return False, msg
-            except Exception as e:
-                msg = f"[ERROR] Groq API error: {e}"
-                print(msg, file=sys.stderr)
-                return False, msg
-
-        print(f"[WARN] All retries exhausted for {model}, trying next model...")
-
-    msg = "[ERROR] All Groq models/retries exhausted"
+    msg = "[ERROR] All providers/models exhausted"
     print(msg, file=sys.stderr)
     return False, msg
 
@@ -171,7 +182,7 @@ def main() -> int:
 
     user_content = f"חדשות עדכניות שנאספו עכשיו:\n\n{news_context}"
 
-    print("[STEP_2] Calling Groq API (llama-3.1-8b-instant)...")
+    print("[STEP_2] Calling LLM API (Gemini → Groq fallback)...")
     ok, output = call_groq(base_prompt, user_content)
 
     if not ok:
