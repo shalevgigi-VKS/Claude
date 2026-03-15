@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>חדשני — מעדכן החדשות</title>
+  <title>חדשני — דסק חדשות מודיעיני</title>
 
   <!-- Google Fonts — Heebo (Hebrew-optimised) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,17 +23,17 @@
         <div class="logo-icon">⚡</div>
         <div class="logo-text">
           <div class="logo-title">חדשני</div>
-          <div class="logo-sub">מעדכן החדשות</div>
+          <div class="logo-sub">דסק חדשות מודיעיני</div>
         </div>
       </a>
 
       <!-- Live clock + Hebrew date -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem">
+      <div class="header-time">
         <span class="live-clock" id="live-clock">00:00:00</span>
         <span class="live-date"  id="live-date"></span>
       </div>
 
-      <!-- Last updated badge (set by script.js from embedded JSON or Looker) -->
+      <!-- Last-updated badge (populated by script.js from embedded JSON) -->
       <span class="ts-badge" id="ts-badge">טוען...</span>
 
       <button class="btn-export" onclick="exportAll()">ייצא הכל ✂</button>
@@ -43,71 +43,30 @@
   <!-- ══════════════ PAGE WRAPPER ══════════════════════════ -->
   <div class="page-wrapper">
 
-    <!-- ── Carousel section ──────────────────────────────── -->
-    <section class="carousel-section" aria-label="תמונות הסבר תהליך">
+    <!-- ── Image Carousel ────────────────────────────────── -->
+    <section class="carousel-section" aria-label="תמונות תהליך">
       <div class="carousel-wrapper">
-
-        <!-- Slides are injected by script.js into this track -->
         <div class="carousel-track" role="region" aria-live="polite"></div>
-
-        <!-- Navigation arrows (RTL: prev = right side, next = left side) -->
+        <!-- RTL: prev = right arrow, next = left arrow -->
         <button class="carousel-btn prev" aria-label="תמונה קודמת">&#8250;</button>
         <button class="carousel-btn next" aria-label="תמונה הבאה">&#8249;</button>
-
-        <!-- Indicator dots -->
         <div class="carousel-dots" role="tablist" aria-label="בחירת תמונה"></div>
-
       </div>
     </section>
 
-    <!-- ── Looker Studio widget ───────────────────────────── -->
-    <section class="looker-section" aria-label="נתוני שוק בזמן אמת">
-      <div class="looker-card">
-        <div class="looker-header">
-          <div class="looker-icon">📊</div>
-          <div>
-            <div class="looker-title">נתוני שוק — Looker Studio</div>
-            <div class="looker-subtitle" id="looker-updated">טוען נתונים...</div>
-          </div>
-          <button class="btn-refresh" id="btn-refresh-looker" aria-label="רענן נתונים">רענן ↺</button>
-        </div>
-        <!-- Looker body: skeleton → data cards / error card -->
-        <div class="looker-body" id="looker-body">
-          <!-- Populated by fetchLookerData() in script.js -->
-        </div>
+    <!-- ── Main content (built by script.js) ─────────────── -->
+    <main id="main-content">
+
+      <!-- Loading / empty state -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">📡</div>
+        <h2>טוען דסק חדשות...</h2>
+        <p>הנתונים יופיעו בקרוב</p>
       </div>
-    </section>
 
-    <!-- ── Two-column layout: Sidebar + Main ─────────────── -->
-    <div class="page-layout">
+      <!-- Cards injected here by initNewsCards() -->
 
-      <!-- Sidebar navigation (scroll spy) -->
-      <nav class="sidebar" aria-label="ניווט סעיפים">
-        <div class="sidebar-inner" id="sidebar-inner">
-          <div class="sidebar-title">ניווט מהיר</div>
-          <!-- Nav items injected by buildNav() in script.js -->
-        </div>
-      </nav>
-
-      <!-- Main content area -->
-      <main>
-
-        <!-- Empty / loading state (hidden once data loads) -->
-        <div class="empty-state" id="empty-state">
-          <div class="big-icon">📡</div>
-          <h2>טוען דסק חדשות...</h2>
-          <p>הנתונים יופיעו בקרוב</p>
-        </div>
-
-        <!-- News cards (shown once data is parsed) -->
-        <div id="news-cols" style="display:none">
-          <div class="col-main" id="col-main">
-            <!-- Section cards injected by initNewsCards() in script.js -->
-          </div>
-        </div>
-
-      </main>
-    </div><!-- /.page-layout -->
+    </main>
 
   </div><!-- /.page-wrapper -->
 
@@ -117,15 +76,14 @@
     חדשני — מעדכן חדשות מודיעיני אוטונומי | מופעל על-ידי Gemini AI + Google Search
   </footer>
 
-  <!-- Toast notification (copy / export feedback) -->
+  <!-- Toast notification (copy/export feedback) -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <!-- ══════════════ EMBEDDED DATA (injected by generate_website.py) ══ -->
-  <!--
-    generate_website.py replaces the PLACEHOLDER tokens below
-    with real JSON before deploying to GitHub Pages.
-    Do NOT edit the data- attribute or the JSON content manually.
-  -->
+  <!-- ══════════════ EMBEDDED DATA ══════════════════════════
+    generate_website.py replaces PLACEHOLDER tokens with
+    real JSON before deploying to GitHub Pages.
+    Do NOT edit these manually.
+  ══════════════════════════════════════════════════════════ -->
   <script id="news-data" type="application/json" data-updated="PLACEHOLDER_DATETIME">
 PLACEHOLDER_NEWS_JSON
   </script>

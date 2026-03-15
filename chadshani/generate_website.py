@@ -45,13 +45,17 @@ TEMPLATE_HTML = ROOT / "website" / "index.html"   # read-only template (always h
 OUTPUT_HTML   = ROOT.parent / "docs" / "index.html"  # generated output → GitHub Pages
 PAGES_URL     = f"https://{GITHUB_USER}.github.io/{GITHUB_REPO}"
 
-SECTION_PATTERN = re.compile(r"^#{1,3}\s+(\d+)\.\s+(.+)$", re.MULTILINE)
-TS_PATTERN      = re.compile(r"(\d{2}\.\d{2}\.\d{4}\s*\|\s*\d{2}:\d{2})")
+SECTION_PATTERN = re.compile(
+    r"^\*\*(\d+)\.\s+(.+?)\*\*\s*$|^#{1,3}\s+(\d+)\.\s+(.+)$",
+    re.MULTILINE,
+)
+TS_PATTERN      = re.compile(r"(\d{2}\.\d{2}\.\d{4}[\s|]+\d{2}:\d{2})")
 
-# Fear & Greed extraction (looks for "CNN: 42" or "42/100" or standalone number near keyword)
+# Fear & Greed extraction — "עומד על **50" or "עומד על 50 (Neutral)"
 FNG_PATTERN     = re.compile(
-    r"(?:CNN[^:]*:|Fear\s*&\s*Greed[^:]*:)\s*(\d{1,3})",
-    re.IGNORECASE,
+    r"עומד על\s*\*{0,2}(\d{1,3})"
+    r"|(?:CNN Fear[^:)]*\):)\s*[^0-9]*?(\d{1,3})\s*\(",
+    re.IGNORECASE | re.UNICODE,
 )
 CRYPTO_FNG_PATTERN = re.compile(
     r"(?:Crypto[^:]*:|קריפטו[^:]*:)\s*(\d{1,3})",
@@ -70,28 +74,32 @@ def extract_timestamp(text: str) -> str:
 def parse_sections(text: str) -> list[dict]:
     """
     Returns list of dicts: {num, title, content}
-    Sections 0–9 map to the 10-section news desk format.
+    Supports both **N. Title** (Gemini output) and # N. Title formats.
     """
     matches = list(SECTION_PATTERN.finditer(text))
     sections = []
     for i, m in enumerate(matches):
+        # Group 1,2 → **N. Title** format; Group 3,4 → # N. Title format
+        if m.group(1) is not None:
+            num, title = int(m.group(1)), m.group(2).strip()
+        else:
+            num, title = int(m.group(3)), m.group(4).strip()
         start = m.end()
         end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
         content = text[start:end].strip()
-        sections.append({
-            "num":     int(m.group(1)),
-            "title":   m.group(2).strip(),
-            "content": content,
-        })
+        # Strip leading/trailing --- separators
+        content = re.sub(r"^-{3,}\s*", "", content).strip()
+        content = re.sub(r"\s*-{3,}$", "", content).strip()
+        sections.append({"num": num, "title": title, "content": content})
     return sections
 
 
 def extract_gauge_values(section0_content: str) -> dict:
-    """Extract numeric Fear & Greed + VIX values from section 0 text."""
+    """Extract numeric Fear & Greed + VIX values from section 1 text."""
     values = {"fng": None, "crypto_fng": None, "vix": None}
     m = FNG_PATTERN.search(section0_content)
     if m:
-        values["fng"] = int(m.group(1))
+        values["fng"] = int(m.group(1) or m.group(2))
     m2 = CRYPTO_FNG_PATTERN.search(section0_content)
     if m2:
         values["crypto_fng"] = int(m2.group(1))
@@ -168,7 +176,12 @@ def main() -> None:
     sections = parse_sections(text)
     print(f"[STEP_1_COMPLETE] {len(sections)} sections parsed")
 
+    # Extract gauge values from section 1 (Fear & Greed + market snapshot)
     gauges = {}
+    sec1 = next((s for s in sections if s["num"] == 1), None)
+    if sec1:
+        gauges = extract_gauge_values(sec1["content"])
+        print(f"[STEP_1_GAUGES] {gauges}")
 
     print("[STEP_2] Building HTML...")
     build_html(sections, timestamp, gauges)   # writes directly to docs/index.html
