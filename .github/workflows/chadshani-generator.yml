@@ -1,0 +1,63 @@
+name: חדשני — יצירת חדשות אוטומטית
+
+on:
+  # 3 פעמים ביום בשעון ישראל (UTC+2 חורף / UTC+3 קיץ — סטייה של עד שעה בקיץ)
+  schedule:
+    - cron: '0 5 * * *'    # ~07:00 ישראל (חורף)
+    - cron: '30 12 * * *'  # ~14:30 ישראל
+    - cron: '0 19 * * *'   # ~21:00 ישראל
+
+  # הפעלה ידנית מ-GitHub Actions UI (כפתור "Run workflow")
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install --quiet -r chadshani/requirements.txt
+
+      # שלב 1: יצירת חדשות (Gemini API → Groq fallback → RSS)
+      - name: Generate news
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY:   ${{ secrets.GROQ_API_KEY }}
+        run: python chadshani/generate_news.py
+
+      # שלב 2: בנה HTML + שלח טלגרם
+      - name: Build website
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_USER:        ${{ github.repository_owner }}
+          GITHUB_REPO:        ${{ github.event.repository.name }}
+          SKIP_GIT_PUSH:      "true"
+        run: python chadshani/generate_website.py
+
+      # שלב 3: פרוס ל-GitHub Pages
+      - name: Deploy to GitHub Pages
+        run: |
+          cp chadshani/website/style.css docs/style.css
+          cp chadshani/website/script.js docs/script.js
+          cp -r chadshani/karusela docs/karusela 2>/dev/null || true
+          git config user.name  "חדשני Bot"
+          git config user.email "chadshani@users.noreply.github.com"
+          git add docs/
+          git diff --staged --quiet || git commit -m "update $(date -u +'%Y-%m-%d %H:%M')"
+          git pull --rebase origin master
+          git push
