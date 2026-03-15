@@ -176,12 +176,22 @@ def main() -> None:
     sections = parse_sections(text)
     print(f"[STEP_1_COMPLETE] {len(sections)} sections parsed")
 
-    # Extract gauge values from section 1 (Fear & Greed + market snapshot)
-    gauges = {}
-    sec1 = next((s for s in sections if s["num"] == 1), None)
-    if sec1:
-        gauges = extract_gauge_values(sec1["content"])
-        print(f"[STEP_1_GAUGES] {gauges}")
+    # Load gauge values — prefer gauges_live.json (saved directly by generate_news.py),
+    # fall back to regex extraction from section 1 text.
+    gauges_live_path = ROOT / "data" / "gauges_live.json"
+    if gauges_live_path.exists():
+        try:
+            gauges = json.loads(gauges_live_path.read_text(encoding="utf-8"))
+            print(f"[GAUGES_LIVE] loaded: {gauges}")
+        except Exception as e:
+            print(f"[GAUGES_WARN] could not read gauges_live.json: {e}")
+            gauges = {}
+    else:
+        gauges = {}
+        sec1 = next((s for s in sections if s["num"] == 1), None)
+        if sec1:
+            gauges = extract_gauge_values(sec1["content"])
+            print(f"[STEP_1_GAUGES] {gauges}")
 
     print("[STEP_2] Building HTML...")
     build_html(sections, timestamp, gauges)   # writes directly to docs/index.html

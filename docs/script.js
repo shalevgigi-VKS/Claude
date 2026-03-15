@@ -196,23 +196,117 @@ function vixStyle(val) {
    5. CARD BUILDERS
 ═══════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════
+   5a. SVG GAUGE HELPERS
+═══════════════════════════════════════════════════════════ */
+
+function _arcPath(cx, cy, r, v1, v2) {
+  // v1, v2 in [0,1]: 0=left, 1=right, arc goes through top
+  const a1 = Math.PI - v1 * Math.PI;
+  const a2 = Math.PI - v2 * Math.PI;
+  const x1 = (cx + r * Math.cos(a1)).toFixed(2);
+  const y1 = (cy - r * Math.sin(a1)).toFixed(2);
+  const x2 = (cx + r * Math.cos(a2)).toFixed(2);
+  const y2 = (cy - r * Math.sin(a2)).toFixed(2);
+  const large = (v2 - v1) > 0.5 ? 1 : 0;
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+}
+
+function buildFngGaugeSVG(val) {
+  const cx = 100, cy = 88, r = 68, sw = 13;
+  const safeVal = val != null ? Math.max(0, Math.min(100, val)) : null;
+  const v = safeVal != null ? safeVal / 100 : 0.5;
+  const fs = fngStyle(safeVal);
+
+  const zones = [
+    { v1: 0,    v2: 0.25, color: '#ef4444' },
+    { v1: 0.25, v2: 0.45, color: '#f97316' },
+    { v1: 0.45, v2: 0.55, color: '#eab308' },
+    { v1: 0.55, v2: 0.75, color: '#84cc16' },
+    { v1: 0.75, v2: 1,    color: '#22c55e' },
+  ];
+
+  const na = Math.PI - v * Math.PI;
+  const nx = (cx + (r - 8) * Math.cos(na)).toFixed(2);
+  const ny = (cy - (r - 8) * Math.sin(na)).toFixed(2);
+
+  const labels = [
+    { v: 0,    label: '0'   }, { v: 0.25, label: '25' },
+    { v: 0.5,  label: '50'  }, { v: 0.75, label: '75' },
+    { v: 1,    label: '100' },
+  ];
+
+  const ticksHtml = labels.map(({ v: lv, label }) => {
+    const la = Math.PI - lv * Math.PI;
+    const tx = (cx + (r + 9) * Math.cos(la)).toFixed(1);
+    const ty = (cy - (r + 9) * Math.sin(la) + 3.5).toFixed(1);
+    return `<text x="${tx}" y="${ty}" text-anchor="middle" font-size="7" fill="#94a3b8">${label}</text>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 200 118" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:210px;margin:0 auto;display:block">
+  <path d="${_arcPath(cx, cy, r, 0, 1)}" fill="none" stroke="#e2e8f0" stroke-width="${sw}" stroke-linecap="butt"/>
+  ${zones.map(z => `<path d="${_arcPath(cx, cy, r, z.v1, z.v2)}" fill="none" stroke="${z.color}" stroke-width="${sw}" stroke-linecap="butt" opacity="0.82"/>`).join('\n  ')}
+  ${ticksHtml}
+  <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="4.5" fill="#334155"/>
+  <text x="${cx}" y="${cy + 22}" text-anchor="middle" font-size="24" font-weight="900" fill="${fs.color}" class="gauge-number-svg" data-target="${safeVal != null ? safeVal : ''}">${safeVal != null ? safeVal : '—'}</text>
+  <text x="${cx}" y="${cy + 34}" text-anchor="middle" font-size="8.5" fill="${fs.color}" font-weight="700">${fs.label}</text>
+</svg>`;
+}
+
+function buildVixGaugeSVG(val) {
+  const cx = 100, cy = 88, r = 68, sw = 13;
+  const safeVal = val != null ? Math.max(0, Math.min(60, val)) : null;
+  const v = safeVal != null ? safeVal / 50 : 0.5;  // scale 0-50
+  const vs = vixStyle(safeVal);
+
+  const zones = [
+    { v1: 0,    v2: 0.30, color: '#22c55e' },  // 0-15
+    { v1: 0.30, v2: 0.50, color: '#eab308' },  // 15-25
+    { v1: 0.50, v2: 1,    color: '#ef4444' },  // 25-50
+  ];
+
+  const na = Math.PI - Math.min(v, 1) * Math.PI;
+  const nx = (cx + (r - 8) * Math.cos(na)).toFixed(2);
+  const ny = (cy - (r - 8) * Math.sin(na)).toFixed(2);
+
+  const labels = [
+    { v: 0, label: '0' }, { v: 0.3, label: '15' },
+    { v: 0.5, label: '25' }, { v: 1, label: '50' },
+  ];
+
+  const ticksHtml = labels.map(({ v: lv, label }) => {
+    const la = Math.PI - lv * Math.PI;
+    const tx = (cx + (r + 9) * Math.cos(la)).toFixed(1);
+    const ty = (cy - (r + 9) * Math.sin(la) + 3.5).toFixed(1);
+    return `<text x="${tx}" y="${ty}" text-anchor="middle" font-size="7" fill="#94a3b8">${label}</text>`;
+  }).join('');
+
+  const dispVal = safeVal != null ? safeVal.toFixed(1) : '—';
+  return `<svg viewBox="0 0 200 118" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:210px;margin:0 auto;display:block">
+  <path d="${_arcPath(cx, cy, r, 0, 1)}" fill="none" stroke="#e2e8f0" stroke-width="${sw}" stroke-linecap="butt"/>
+  ${zones.map(z => `<path d="${_arcPath(cx, cy, r, z.v1, z.v2)}" fill="none" stroke="${z.color}" stroke-width="${sw}" stroke-linecap="butt" opacity="0.82"/>`).join('\n  ')}
+  ${ticksHtml}
+  <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="4.5" fill="#334155"/>
+  <text x="${cx}" y="${cy + 22}" text-anchor="middle" font-size="24" font-weight="900" fill="${vs.color}" class="gauge-number-svg" data-target="${safeVal != null ? safeVal : ''}" data-float="1">${dispVal}</text>
+  <text x="${cx}" y="${cy + 34}" text-anchor="middle" font-size="8.5" fill="${vs.color}" font-weight="700">${vs.label}</text>
+</svg>`;
+}
+
 function buildGaugeRow(gauges) {
   const fng = gauges.fng != null ? Math.round(gauges.fng) : null;
   const vix = gauges.vix != null ? parseFloat(gauges.vix) : null;
-  const fs  = fngStyle(fng);
-  const vs  = vixStyle(vix);
 
   return `
 <div class="gauge-row">
   <div class="card card--gauge">
     <div class="gauge-label">CNN Fear &amp; Greed</div>
-    <div class="gauge-number" style="color:${fs.color}">${fng != null ? fng : '—'}</div>
-    <span class="gauge-sentiment" style="background:${fs.bg};color:${fs.color}">${fs.label}</span>
+    ${buildFngGaugeSVG(fng)}
   </div>
   <div class="card card--gauge">
-    <div class="gauge-label">VIX</div>
-    <div class="gauge-number" style="color:${vs.color}">${vix != null ? vix.toFixed(1) : '—'}</div>
-    <span class="gauge-sentiment" style="background:${vs.bg};color:${vs.color}">${vs.label}</span>
+    <div class="gauge-label">מדד התנודתיות — VIX</div>
+    ${buildVixGaugeSVG(vix)}
   </div>
 </div>`;
 }
@@ -368,11 +462,90 @@ window.exportAll   = exportAll;
 
 
 /* ═══════════════════════════════════════════════════════════
-   8. BOOTSTRAP
+   8. 3D TILT EFFECT
+═══════════════════════════════════════════════════════════ */
+
+function initTilt() {
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      card.style.transform =
+        `perspective(900px) rotateX(${(-y * 10).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) translateZ(4px)`;
+      card.style.setProperty('--glare-x', `${((x + 0.5) * 100).toFixed(1)}%`);
+      card.style.setProperty('--glare-y', `${((y + 0.5) * 100).toFixed(1)}%`);
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   9. STAGGERED LOAD ANIMATIONS
+═══════════════════════════════════════════════════════════ */
+
+function initStagger() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      obs.unobserve(e.target);
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.card').forEach((card, i) => {
+    card.style.animationDelay = (i * 75) + 'ms';
+    obs.observe(card);
+  });
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   10. NUMBER COUNTERS (SVG gauge text)
+═══════════════════════════════════════════════════════════ */
+
+function animateCounter(el, target, isFloat, duration) {
+  const start = performance.now();
+  function step(now) {
+    const p    = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);  // cubic ease-out
+    const val  = target * ease;
+    el.textContent = isFloat ? val.toFixed(1) : Math.round(val);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function initCounters() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el     = e.target;
+      const target = parseFloat(el.dataset.target);
+      const isFloat = el.dataset.float === '1';
+      if (!isNaN(target)) animateCounter(el, target, isFloat, 1200);
+      obs.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.gauge-number-svg[data-target]').forEach(el => {
+    if (el.dataset.target !== '') obs.observe(el);
+  });
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   11. BOOTSTRAP
 ═══════════════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
   const wrapper = document.querySelector('.carousel-wrapper');
   if (wrapper) new Carousel(wrapper);
   initNewsCards();
+  initTilt();
+  initStagger();
+  initCounters();
 });

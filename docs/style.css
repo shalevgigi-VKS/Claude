@@ -33,16 +33,25 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient gradient background */
+/* Animated ambient gradient background */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse at 15% 20%, rgba(107, 191, 181, .09) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 65%, rgba(122, 156, 200, .09) 0%, transparent 55%);
+    radial-gradient(ellipse at 15% 20%, rgba(107, 191, 181, .12) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 65%, rgba(122, 156, 200, .12) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 90%, rgba(168, 139, 250, .07) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
+  animation: bgFloat 18s ease-in-out infinite alternate;
+}
+
+@keyframes bgFloat {
+  0%   { transform: scale(1)    translate(0, 0);      opacity: .9; }
+  33%  { transform: scale(1.04) translate(-2%, 1.5%); opacity: 1; }
+  66%  { transform: scale(1.06) translate(1.5%, -2%); opacity: .95; }
+  100% { transform: scale(.97)  translate(2%, 1%);    opacity: .85; }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -247,19 +256,58 @@ body::before {
 ══════════════════════════════════════════════════════════ */
 
 .card {
-  background: var(--surface);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
+  position: relative;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, .94) 0%,
+    rgba(255, 255, 255, .76) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, .78);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow:
+    0 4px 24px rgba(100, 150, 200, .12),
+    0 1px 4px  rgba(255, 255, 255, .80) inset,
+    0 -1px 2px rgba(100, 150, 200, .07) inset;
   padding: 1.25rem;
-  transition: box-shadow .25s, transform .25s;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform .15s ease, box-shadow .25s ease;
+  opacity: 0;  /* set to visible by .visible class via JS stagger */
 }
 
+/* Glare overlay */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255, 255, 255, .38) 0%,
+    transparent 62%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.card:hover::after { opacity: 1; }
+
 .card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  box-shadow:
+    0 8px 40px rgba(100, 150, 200, .22),
+    0 2px 6px  rgba(255, 255, 255, .85) inset,
+    0 -1px 2px rgba(100, 150, 200, .10) inset;
+}
+
+/* Staggered load animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card.visible {
+  animation: fadeInUp .55s ease forwards;
 }
 
 /* Card header row */
@@ -320,7 +368,7 @@ body::before {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem 1rem;
 }
 
 .gauge-label {

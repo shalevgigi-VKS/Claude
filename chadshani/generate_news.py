@@ -5,6 +5,7 @@ the 10-section news desk. Writes result to temp_news.txt.
 Env vars required:
     GROQ_API_KEY  — from console.groq.com (free, no credit card)
 """
+import json
 import os
 import re
 import sys
@@ -67,8 +68,9 @@ def ensure_timestamp(text: str) -> str:
 # ── Live market data (free, no API key) ────────────────────────────────────
 
 def fetch_market_data() -> str:
-    """Fetch real F&G, Crypto F&G and VIX. Returns a formatted string to inject into prompt."""
+    """Fetch real F&G, Crypto F&G and VIX. Saves gauges_live.json + returns formatted string."""
     lines = []
+    gauges: dict = {"fng": None, "crypto_fng": None, "vix": None}
 
     # CNN Fear & Greed
     try:
@@ -81,6 +83,7 @@ def fetch_market_data() -> str:
         val  = round(d["score"])
         prev = round(d.get("previous_close", d["score"]))
         rating = d.get("rating", "")
+        gauges["fng"] = val
         lines.append(f"CNN Fear & Greed Index: {val}/100 ({rating}) | שבוע שעבר: {prev}")
     except Exception as e:
         lines.append(f"CNN Fear & Greed Index: לא זמין ({e})")
@@ -89,6 +92,7 @@ def fetch_market_data() -> str:
     try:
         r = requests.get("https://api.alternative.me/fng/?limit=1", timeout=10)
         d = r.json()["data"][0]
+        gauges["crypto_fng"] = int(d["value"])
         lines.append(f"Crypto Fear & Greed Index: {d['value']}/100 ({d['value_classification']})")
     except Exception as e:
         lines.append(f"Crypto Fear & Greed Index: לא זמין ({e})")
@@ -103,9 +107,18 @@ def fetch_market_data() -> str:
         )
         meta = r.json()["chart"]["result"][0]["meta"]
         vix  = meta.get("regularMarketPrice") or meta.get("previousClose")
+        gauges["vix"] = float(vix) if vix is not None else None
         lines.append(f"VIX (מדד הפחד): {vix}")
     except Exception as e:
         lines.append(f"VIX: לא זמין ({e})")
+
+    # Save raw gauge values directly (bypasses LLM text parsing)
+    data_dir = ROOT / "data"
+    data_dir.mkdir(exist_ok=True)
+    (data_dir / "gauges_live.json").write_text(
+        json.dumps(gauges, ensure_ascii=False), encoding="utf-8"
+    )
+    print(f"[GAUGES_LIVE] saved: {gauges}")
 
     result = "\n".join(lines)
     print(f"[MARKET_DATA]\n{result}")
