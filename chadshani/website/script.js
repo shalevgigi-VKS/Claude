@@ -154,15 +154,15 @@ const SECTIONS_META = [
   { num: 3, icon: '🗺', label: 'מפת הסקטורים',
     border: '#c4b5fd', bg: 'rgba(250,245,255,.85)', lb: '#ede9fe', tc: '#4c1d95', type: 'sectors' },
   { num: 4, icon: '₿',  label: 'שוק הקריפטו',
-    border: '#fdba74', bg: 'rgba(255,247,237,.85)', lb: '#ffedd5', tc: '#7c2d12', type: 'section' },
+    border: '#fdba74', bg: 'rgba(255,247,237,.85)', lb: '#ffedd5', tc: '#7c2d12', type: 'datatable' },
   { num: 5, icon: '⚡', label: 'סקטור השבבים',
-    border: '#7dd3fc', bg: 'rgba(240,249,255,.85)', lb: '#e0f2fe', tc: '#0c4a6e', type: 'section' },
+    border: '#7dd3fc', bg: 'rgba(240,249,255,.85)', lb: '#e0f2fe', tc: '#0c4a6e', type: 'datatable' },
   { num: 6, icon: '💻', label: 'סקטור התוכנה וסייבר',
-    border: '#e879f9', bg: 'rgba(253,244,255,.85)', lb: '#fae8ff', tc: '#701a75', type: 'section' },
+    border: '#e879f9', bg: 'rgba(253,244,255,.85)', lb: '#fae8ff', tc: '#701a75', type: 'datatable' },
   { num: 7, icon: '🤖', label: 'תחום ה-AI',
-    border: '#a78bfa', bg: 'rgba(245,243,255,.85)', lb: '#ede9fe', tc: '#4c1d95', type: 'section' },
+    border: '#a78bfa', bg: 'rgba(245,243,255,.85)', lb: '#ede9fe', tc: '#4c1d95', type: 'datatable' },
   { num: 8, icon: '🛠', label: 'עדכוני כלי AI',
-    border: '#5eead4', bg: 'rgba(240,253,250,.85)', lb: '#ccfbf1', tc: '#134e4a', type: 'section' },
+    border: '#5eead4', bg: 'rgba(240,253,250,.85)', lb: '#ccfbf1', tc: '#134e4a', type: 'datatable' },
   { num: 9, icon: '⚠️', label: 'אירועי סיכון 48 שעות',
     border: '#f97316', bg: 'rgba(255,247,237,.85)', lb: '#ffedd5', tc: '#7c2d12', type: 'redteam' },
 ];
@@ -187,8 +187,10 @@ function escHtml(s) {
 function renderMarkdown(s) {
   return escHtml(s || '')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\+(\d[\d.,]*\s*%?)/g, '<span class="chg-up">+$1</span>')
-    .replace(/(?<![A-Za-z\d])-(\d[\d.,]*\s*%)/g, '<span class="chg-dn">-$1</span>');
+    // auto-bold standalone ticker-like tokens (2-6 uppercase letters/digits, not already in <strong>)
+    .replace(/(?<![A-Za-z<])([A-Z][A-Z0-9]{1,5})(?![a-z>\w])/g, '<strong>$1</strong>')
+    .replace(/\+(\d[\d.,]+\s*%?)/g, '<span class="chg-up">+$1</span>')
+    .replace(/(?<![A-Za-z\d])-(\d[\d.,]+\s*%?)/g, '<span class="chg-dn">-$1</span>');
 }
 
 function fngStyle(val) {
@@ -353,6 +355,7 @@ function buildTickerList(content) {
 
 function buildSectorTable(content) {
   let html = '<div class="sector-table">';
+  const parsed = [];
   for (const { etf, name } of SECTORS_MAP) {
     const re = new RegExp(
       String.raw`\*{0,2}${etf}\*{0,2}[^\n|]*\|[^\n|]*\|\s*([+\-]?[\d.]+\s*%?)\s*\|?([^\n]*)`,
@@ -360,25 +363,69 @@ function buildSectorTable(content) {
     );
     const m   = content.match(re);
     const pct = m ? m[1].trim() : null;
-    const note = m ? m[2].trim().replace(/^\s*[-–—]\s*/, '').slice(0, 50) : '';
     const cls  = pct ? (pct.startsWith('+') ? 'chg-up' : pct.startsWith('-') ? 'chg-dn' : '') : '';
+    parsed.push({ etf, name, pct, cls });
     html += `<div class="sector-row">
       <span class="sector-etf">${etf}</span>
       <span class="sector-name">${name}</span>
       <span class="sector-pct ${cls}">${pct || '—'}</span>
-      ${note ? `<span class="sector-note">${escHtml(note)}</span>` : ''}
     </div>`;
   }
   html += '</div>';
-  const rot = content.match(/רוטציה[^.\n]*/);
-  if (rot) html += `<div class="sector-rotation">${renderMarkdown(rot[0])}</div>`;
+
+  // Bottom line: extract מגמה line, or build from parsed data
+  const mgama = content.match(/(?:מגמה|כיוון|שורה תחתונה)[^\n]*/);
+  if (mgama) {
+    html += `<div class="sector-rotation">${renderMarkdown(mgama[0])}</div>`;
+  } else {
+    // build auto-summary from parsed sector data
+    const withData = parsed.filter(s => s.pct);
+    if (withData.length) {
+      const sorted  = [...withData].sort((a, b) => parseFloat(a.pct) - parseFloat(b.pct));
+      const bottom2 = sorted.slice(0, 2);
+      const top2    = sorted.slice(-2).reverse();
+      const rotText = `רוטציה: מ-${bottom2.map(s => s.etf).join('/')} (${bottom2.map(s => s.name).join('/')}) לכיוון ${top2.map(s => s.etf).join('/')} (${top2.map(s => s.name).join('/')})`;
+      html += `<div class="sector-rotation">${escHtml(rotText)}</div>`;
+    }
+  }
   return html;
+}
+
+function buildSmartTable(content) {
+  const rows = [];
+  for (const line of (content || '').split('\n')) {
+    const t = line.trim();
+    if (!t || /^-{3,}$/.test(t)) continue;
+    if (t.includes('|')) {
+      rows.push(t.split('|').map(c => c.trim()).filter(Boolean));
+    } else {
+      rows.push([t]);
+    }
+  }
+  if (!rows.length) return `<div class="section-content">${renderMarkdown(content)}</div>`;
+  let html = '<table class="data-table"><tbody>';
+  for (const cells of rows) {
+    if (cells.length === 1) {
+      html += `<tr class="table-note-row"><td colspan="10">${renderMarkdown(cells[0])}</td></tr>`;
+    } else {
+      html += '<tr>' + cells.map((c, i) => {
+        const raw = c.replace(/\*\*/g, '');
+        const cls = raw.match(/^\+\d/) ? 'td-up'
+                  : raw.match(/^-\d/)  ? 'td-dn'
+                  : i === 0            ? 'td-ticker'
+                  : '';
+        return `<td class="${cls}">${renderMarkdown(c)}</td>`;
+      }).join('') + '</tr>';
+    }
+  }
+  return html + '</tbody></table>';
 }
 
 function buildCardHTML(sec, cfg) {
   const extraClass = cfg.type === 'redteam' ? ' card--redteam' : '';
-  const body = cfg.type === 'tickers'  ? buildTickerList(sec.content)
-             : cfg.type === 'sectors'  ? buildSectorTable(sec.content)
+  const body = cfg.type === 'tickers'   ? buildTickerList(sec.content)
+             : cfg.type === 'sectors'   ? buildSectorTable(sec.content)
+             : cfg.type === 'datatable' ? buildSmartTable(sec.content)
              : `<div class="section-content">${renderMarkdown(sec.content)}</div>`;
 
   return `
@@ -439,7 +486,7 @@ function initNewsCards() {
     <button class="btn-copy" onclick="copySection(1,this)">העתק</button>
   </div>
   <div class="card-body">
-    <div class="section-content">${renderMarkdown(heroSec.content)}</div>
+    <div class="section-content">${renderMarkdown(heroSec.content.replace(/ \| /g, '\n'))}</div>
   </div>
 </div>`;
   }
@@ -512,7 +559,7 @@ function initTilt() {
       const x = (e.clientX - r.left) / r.width  - 0.5;
       const y = (e.clientY - r.top)  / r.height - 0.5;
       card.style.transform =
-        `perspective(900px) rotateX(${(-y * 10).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) translateZ(4px)`;
+        `perspective(800px) rotateX(${(-y * 14).toFixed(2)}deg) rotateY(${(x * 14).toFixed(2)}deg) translateZ(10px) scale(1.01)`;
       card.style.setProperty('--glare-x', `${((x + 0.5) * 100).toFixed(1)}%`);
       card.style.setProperty('--glare-y', `${((y + 0.5) * 100).toFixed(1)}%`);
     });

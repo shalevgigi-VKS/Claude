@@ -62,6 +62,7 @@ jobs:
         run: |
           cp chadshani/website/style.css docs/style.css
           cp chadshani/website/script.js docs/script.js
+          cp chadshani/SHALEV.PNG docs/SHALEV.PNG 2>/dev/null || true
           cp -r chadshani/karusela docs/karusela 2>/dev/null || true
           git config user.name  "חדשני Bot"
           git config user.email "chadshani@users.noreply.github.com"
