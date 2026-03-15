@@ -210,13 +210,17 @@ def main() -> None:
         else:
             print("[STEP_3_WARN] Git push failed — sending local path")
 
-    print("[STEP_4] Sending Telegram...")
-    date_str = now_il.strftime("%d.%m.%Y")
-    time_str = now_il.strftime("%H:%M")
-    url = PAGES_URL if ok else str(OUTPUT_HTML)
-    msg = f"עדכון החדשות מוכן נכון ל{date_str} {time_str}\n{url}"
-    send_telegram(msg)
-    print("[STEP_4_COMPLETE]")
+    skip_tg = os.environ.get("SKIP_TELEGRAM", "").lower() in ("true", "1", "yes")
+    if skip_tg:
+        print("[STEP_4_SKIP] SKIP_TELEGRAM set — workflow will send notification after push")
+    else:
+        print("[STEP_4] Sending Telegram...")
+        date_str = now_il.strftime("%d.%m.%Y")
+        time_str = now_il.strftime("%H:%M")
+        url = PAGES_URL if ok else str(OUTPUT_HTML)
+        msg = f"עדכון החדשות מוכן נכון ל{date_str} {time_str}\n{url}"
+        send_telegram(msg)
+        print("[STEP_4_COMPLETE]")
 
     TEMP_NEWS.unlink(missing_ok=True)
     print("[PIPELINE_COMPLETE]")

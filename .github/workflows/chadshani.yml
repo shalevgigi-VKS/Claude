@@ -43,14 +43,13 @@ jobs:
           print('[OK] temp_news.txt נוצר —', len(content), 'תווים, updated:', ts)
           "
 
-      # שלב 2: בנה את ה-HTML ושלח טלגרם
+      # שלב 2: בנה את ה-HTML (ללא שליחת טלגרם — יישלח אחרי push)
       - name: Build website
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
-          GITHUB_USER:        ${{ github.repository_owner }}
-          GITHUB_REPO:        ${{ github.event.repository.name }}
-          SKIP_GIT_PUSH:      "true"
+          GITHUB_USER:   ${{ github.repository_owner }}
+          GITHUB_REPO:   ${{ github.event.repository.name }}
+          SKIP_GIT_PUSH: "true"
+          SKIP_TELEGRAM: "true"
         run: python chadshani/generate_website.py
 
       # שלב 3: commit + push ל-GitHub Pages
@@ -65,3 +64,30 @@ jobs:
           git diff --staged --quiet || git commit -m "update $(date -u +'%Y-%m-%d %H:%M')"
           git pull --rebase origin master
           git push
+
+      # שלב 4: שלח טלגרם רק אחרי שה-push הסתיים
+      - name: Send Telegram notification
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_USER:        ${{ github.repository_owner }}
+          GITHUB_REPO:        ${{ github.event.repository.name }}
+        run: |
+          python -c "
+          import os, requests, json
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          token   = os.environ['TELEGRAM_BOT_TOKEN']
+          chat_id = os.environ['TELEGRAM_CHAT_ID']
+          user    = os.environ.get('GITHUB_USER','')
+          repo    = os.environ.get('GITHUB_REPO','')
+          now_il  = datetime.now(ZoneInfo('Asia/Jerusalem'))
+          date_str = now_il.strftime('%d.%m.%Y')
+          time_str = now_il.strftime('%H:%M')
+          url_pages = f'https://{user}.github.io/{repo}'
+          msg = f'עדכון החדשות מוכן נכון ל{date_str} {time_str}\n{url_pages}'
+          requests.post(f'https://api.telegram.org/bot{token}/sendMessage',
+            json={'chat_id': chat_id, 'text': msg}, timeout=10)
+          print('[TELEGRAM_SENT]')
+          "
+
