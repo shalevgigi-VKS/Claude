@@ -121,33 +121,46 @@ class Carousel {
 
 
 /* ═══════════════════════════════════════════════════════════
-   3. SECTIONS METADATA (numbered 1–12, matching Gemini output)
+   3. SECTOR MAP — קבוע (תמיד 11 שורות, רק % מתעדכן)
+═══════════════════════════════════════════════════════════ */
+
+const SECTORS_MAP = [
+  { etf: 'XLK',  name: 'טכנולוגיה' },
+  { etf: 'XLV',  name: 'בריאות' },
+  { etf: 'XLF',  name: 'פיננסים' },
+  { etf: 'XLE',  name: 'אנרגיה' },
+  { etf: 'XLY',  name: 'צרכנות שיקולית' },
+  { etf: 'XLP',  name: 'צרכנות בסיסית' },
+  { etf: 'XLU',  name: 'שירותים ציבוריים' },
+  { etf: 'XLI',  name: 'תעשייה' },
+  { etf: 'XLB',  name: 'חומרים' },
+  { etf: 'XLRE', name: 'נדל"ן' },
+  { etf: 'XLC',  name: 'תקשורת ומדיה' },
+];
+
+
+/* ═══════════════════════════════════════════════════════════
+   4. SECTIONS METADATA (numbered 1–9, תואם לפרומפט)
 ═══════════════════════════════════════════════════════════ */
 
 const SECTIONS_META = [
-  { num: 1,  icon: '📊', label: 'מדד פחד וחמדנות + תמונת מצב',
+  { num: 1, icon: '📊', label: 'תמונת מצב מיידית',
     border: '#fcd34d', bg: 'rgba(255,251,235,.85)', lb: '#fef3c7', tc: '#92400e', type: 'hero' },
-  { num: 2,  icon: '🌐', label: 'מכ"ם גיאופוליטי',
-    border: '#86efac', bg: 'rgba(240,253,244,.85)', lb: '#dcfce7', tc: '#14532d', type: 'section' },
-  { num: 3,  icon: '📈', label: 'שוק ההון הכללי',
+  { num: 2, icon: '📈', label: 'שוק ההון הכללי',
     border: '#93c5fd', bg: 'rgba(239,246,255,.85)', lb: '#dbeafe', tc: '#1e3a8a', type: 'section' },
-  { num: 4,  icon: '🗺', label: 'מפת הסקטורים',
-    border: '#c4b5fd', bg: 'rgba(250,245,255,.85)', lb: '#ede9fe', tc: '#4c1d95', type: 'section' },
-  { num: 5,  icon: '💰', label: 'מעקב קרנות הון סיכון',
-    border: '#6ee7b7', bg: 'rgba(236,253,245,.85)', lb: '#d1fae5', tc: '#064e3b', type: 'section' },
-  { num: 6,  icon: '₿',  label: 'שוק הקריפטו',
+  { num: 3, icon: '🗺', label: 'מפת הסקטורים',
+    border: '#c4b5fd', bg: 'rgba(250,245,255,.85)', lb: '#ede9fe', tc: '#4c1d95', type: 'sectors' },
+  { num: 4, icon: '₿',  label: 'שוק הקריפטו',
     border: '#fdba74', bg: 'rgba(255,247,237,.85)', lb: '#ffedd5', tc: '#7c2d12', type: 'section' },
-  { num: 7,  icon: '⚡', label: 'סקטור השבבים',
+  { num: 5, icon: '⚡', label: 'סקטור השבבים',
     border: '#7dd3fc', bg: 'rgba(240,249,255,.85)', lb: '#e0f2fe', tc: '#0c4a6e', type: 'section' },
-  { num: 8,  icon: '💻', label: 'תוכנה וסייבר',
+  { num: 6, icon: '💻', label: 'סקטור התוכנה וסייבר',
     border: '#e879f9', bg: 'rgba(253,244,255,.85)', lb: '#fae8ff', tc: '#701a75', type: 'section' },
-  { num: 9,  icon: '🤖', label: 'מודלים ו-AI',
+  { num: 7, icon: '🤖', label: 'תחום ה-AI',
     border: '#a78bfa', bg: 'rgba(245,243,255,.85)', lb: '#ede9fe', tc: '#4c1d95', type: 'section' },
-  { num: 10, icon: '🛠', label: 'כלי AI יומיומיים',
+  { num: 8, icon: '🛠', label: 'עדכוני כלי AI',
     border: '#5eead4', bg: 'rgba(240,253,250,.85)', lb: '#ccfbf1', tc: '#134e4a', type: 'section' },
-  { num: 11, icon: '📌', label: 'סיכום: טיקרים וסיכונים',
-    border: '#fda4af', bg: 'rgba(255,241,242,.85)', lb: '#ffe4e6', tc: '#881337', type: 'tickers' },
-  { num: 12, icon: '⚠️', label: 'זווית איפכא מסתברא',
+  { num: 9, icon: '⚠️', label: 'אירועי סיכון 48 שעות',
     border: '#f97316', bg: 'rgba(255,247,237,.85)', lb: '#ffedd5', tc: '#7c2d12', type: 'redteam' },
 ];
 
@@ -335,11 +348,35 @@ function buildTickerList(content) {
   return html + '</div>';
 }
 
+function buildSectorTable(content) {
+  let html = '<div class="sector-table">';
+  for (const { etf, name } of SECTORS_MAP) {
+    const re = new RegExp(
+      String.raw`\*{0,2}${etf}\*{0,2}[^\n|]*\|[^\n|]*\|\s*([+\-]?[\d.]+\s*%?)\s*\|?([^\n]*)`,
+      'i'
+    );
+    const m   = content.match(re);
+    const pct = m ? m[1].trim() : null;
+    const note = m ? m[2].trim().replace(/^\s*[-–—]\s*/, '').slice(0, 50) : '';
+    const cls  = pct ? (pct.startsWith('+') ? 'chg-up' : pct.startsWith('-') ? 'chg-dn' : '') : '';
+    html += `<div class="sector-row">
+      <span class="sector-etf">${etf}</span>
+      <span class="sector-name">${name}</span>
+      <span class="sector-pct ${cls}">${pct || '—'}</span>
+      ${note ? `<span class="sector-note">${escHtml(note)}</span>` : ''}
+    </div>`;
+  }
+  html += '</div>';
+  const rot = content.match(/רוטציה[^.\n]*/);
+  if (rot) html += `<div class="sector-rotation">${renderMarkdown(rot[0])}</div>`;
+  return html;
+}
+
 function buildCardHTML(sec, cfg) {
   const extraClass = cfg.type === 'redteam' ? ' card--redteam' : '';
-  const body = cfg.type === 'tickers'
-    ? buildTickerList(sec.content)
-    : `<div class="section-content">${renderMarkdown(sec.content)}</div>`;
+  const body = cfg.type === 'tickers'  ? buildTickerList(sec.content)
+             : cfg.type === 'sectors'  ? buildSectorTable(sec.content)
+             : `<div class="section-content">${renderMarkdown(sec.content)}</div>`;
 
   return `
 <div class="card card--section${extraClass}" id="section-${sec.num}"

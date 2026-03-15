@@ -417,10 +417,12 @@ body::before {
 
 .section-content {
   font-size: .875rem;
-  line-height: 1.75;
+  line-height: 1.9;
   white-space: pre-wrap;
   word-break: break-word;
   color: var(--text);
+  text-align: justify;
+  text-align-last: right;
 }
 
 .chg-up { color: var(--green); font-weight: 600; }
@@ -462,6 +464,37 @@ body::before {
   font-weight: 700;
   color: var(--accent2);
   padding: .5rem 0 .15rem;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SECTOR TABLE (section 3 — מפת הסקטורים)
+══════════════════════════════════════════════════════════ */
+
+.sector-table { display: flex; flex-direction: column; }
+
+.sector-row {
+  display: grid;
+  grid-template-columns: 3.2rem 9rem 4rem 1fr;
+  align-items: center;
+  gap: .55rem;
+  padding: .38rem .1rem;
+  border-bottom: 1px solid rgba(100, 150, 200, .09);
+  font-size: .83rem;
+}
+.sector-row:last-child { border-bottom: none; }
+
+.sector-etf  { font-weight: 800; color: var(--accent2); font-size: .76rem; font-variant-numeric: tabular-nums; }
+.sector-name { font-weight: 600; }
+.sector-pct  { font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.sector-note { color: var(--muted); font-size: .74rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sector-rotation {
+  margin-top: .75rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--accent2);
+  padding-top: .5rem;
+  border-top: 1px solid rgba(100, 150, 200, .14);
 }
 
 /* ══════════════════════════════════════════════════════════

@@ -9,7 +9,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -127,16 +127,39 @@ def fetch_market_data() -> str:
 
 # ── RSS fetcher ────────────────────────────────────────────────────────────
 
+ARTICLE_MAX_AGE_HOURS = 48
+
+
+def is_recent(entry) -> bool:
+    """True if article published within last 48 hours (or no date available)."""
+    for field in ('published_parsed', 'updated_parsed'):
+        t = entry.get(field)
+        if t:
+            try:
+                dt    = datetime(*t[:6], tzinfo=timezone.utc)
+                age_h = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
+                return age_h <= ARTICLE_MAX_AGE_HOURS
+            except Exception:
+                pass
+    return True  # אין תאריך — כלול (benefit of doubt)
+
+
 def fetch_rss() -> list[str]:
     articles = []
     for name, url in RSS_SOURCES:
         try:
             feed = feedparser.parse(url)
-            for entry in feed.entries[:MAX_ARTICLES]:
+            source_articles = []
+            for entry in feed.entries[:MAX_ARTICLES * 3]:
+                if not is_recent(entry):
+                    continue
                 title   = entry.get("title", "").strip()
                 summary = entry.get("summary", entry.get("description", ""))
                 summary = re.sub(r"<[^>]+>", "", summary).strip()[:600]
-                articles.append(f"[{name}] {title}\n{summary}")
+                source_articles.append(f"[{name}] {title}\n{summary}")
+                if len(source_articles) >= MAX_ARTICLES:
+                    break
+            articles.extend(source_articles)
         except Exception as e:
             print(f"[RSS_WARN] {name}: {e}")
     return articles
